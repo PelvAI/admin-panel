@@ -1,26 +1,93 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #F9F9F9;
   --foreground: #171717;
+
+  --primary: #f55c7a;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f57c73;
+  --secondary-foreground: #ffffff;
+
+  --accent: #f6bc66;
+  --accent-foreground: #ffffff;
+
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+
+  --card: #ffffff;
+  --card-foreground: #171717;
+
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --ring: #f55c7a;
+
+  --radius: 0.75rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Brand Palette from User Image */
+  --color-brand-100: #f6bc66;
+  /* Yellow/Orange */
+  --color-brand-200: #f6ac69;
+  --color-brand-300: #f68c70;
+  --color-brand-400: #f57c73;
+  --color-brand-500: #f55c7a;
+  /* Pink/Red - Primary */
+
+  /* Map Primary to Brand 500 */
+  --color-primary: var(--color-brand-500);
+  --color-primary-foreground: #ffffff;
+
+  /* Map Secondary to Brand 400 */
+  --color-secondary: var(--color-brand-400);
+  --color-secondary-foreground: #ffffff;
+
+  /* Map Accent to Brand 100 */
+  --color-accent: var(--color-brand-100);
+  --color-accent-foreground: #ffffff;
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-lato), sans-serif;
+  --font-heading: var(--font-poppins), sans-serif;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
 }
