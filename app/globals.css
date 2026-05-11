@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F5EFE6; /* Ivory */
+  --foreground: #1C2540; /* Charcoal */
+
+  --primary: #0D1A3E; /* Midnight */
+  --primary-foreground: #F5EFE6;
+
+  --secondary: #C4647A; /* Rose Dust */
+  --secondary-foreground: #ffffff;
+
+  --accent: #C9913A; /* Gold */
+  --accent-foreground: #ffffff;
+
+  --muted: #D5D9E2; /* Fog */
+  --muted-foreground: #4A5570;
+
+  --card: #FAFAF8; /* Snow */
+  --card-foreground: #1C2540;
+
+  --popover: #FAFAF8;
+  --popover-foreground: #1C2540;
+
+  --border: #D5D9E2;
+  --input: #D5D9E2;
+  --ring: #0D1A3E;
+
+  --radius: 1rem; /* 16px following manual */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Vela Brand Palette */
+  --color-midnight: #0D1A3E;
+  --color-midnight-2: #162050;
+  --color-ivory: #F5EFE6;
+  --color-rose: #C4647A;
+  --color-sage: #3D9E8A;
+  --color-gold: #C9913A;
+  --color-snow: #FAFAF8;
+  --color-fog: #D5D9E2;
+  --color-silver: #8A95A3;
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-mono: 'DM Mono', monospace;
+
+  --radius-lg: 1.25rem; /* 20px */
+  --radius-md: var(--radius);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 { @apply font-heading font-light leading-[0.92] tracking-[-0.02em] text-4xl lg:text-6xl; }
+  h2 { @apply font-heading font-normal leading-none tracking-[-0.015em] text-3xl lg:text-5xl; }
+  h3 { @apply font-heading font-medium leading-[1.2] text-2xl lg:text-3xl; }
+}
+
+@layer components {
+  .glow-bg {
+    @apply relative overflow-hidden;
+  }
+  .glow-bg::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none z-0;
+    background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(196, 100, 122, 0.08), transparent),
+        radial-gradient(ellipse 50% 60% at 80% 70%, rgba(61, 158, 138, 0.06), transparent),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(201, 145, 58, 0.04), transparent);
+  }
+
+  .reveal {
+    @apply opacity-0 translate-y-5 transition-all duration-700 ease-out;
+  }
+  .reveal.visible {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .ghost-text {
+    @apply absolute bottom-[-10px] right-[10px] font-heading font-semibold text-6xl text-midnight/5 leading-none select-none pointer-events-none;
+  }
+}
