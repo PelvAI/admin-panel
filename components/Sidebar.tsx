@@ -74,7 +74,7 @@ export function Sidebar() {
     return (
         <div className="flex h-screen w-64 flex-col bg-white border-r border-border shadow-sm overflow-y-auto">
             <div className="flex h-16 items-center justify-start border-b border-border px-6">
-                <Image src="/logo.svg" alt="Vela Logo" width={100} height={32} className="h-8 w-auto" priority />
+                <Image src="/logo.svg" alt="ALMA Logo" width={100} height={32} className="h-8 w-auto" priority />
             </div>
 
             <nav className="flex-1 space-y-2 p-4">

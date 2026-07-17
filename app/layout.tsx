@@ -14,8 +14,8 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Vela Admin",
-  description: "Vela Health Intelligence System - Admin Dashboard",
+  title: "ALMA Platform",
+  description: "ALMA Health Intelligence System — Panel de Administración",
 };
 
 export default function RootLayout({

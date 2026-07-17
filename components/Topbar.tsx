@@ -27,7 +27,7 @@ export function Topbar() {
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <input
                         type="search"
-                        placeholder="Buscar en Vela..."
+                        placeholder="Buscar en ALMA..."
                         className="h-10 w-80 rounded-full border border-input bg-background pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
                     />
                 </div>
@@ -57,7 +57,7 @@ export function Topbar() {
                     {isDropdownOpen && (
                         <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-white shadow-lg py-1 animate-in fade-in zoom-in-95 duration-100">
                             <div className="px-3 py-2 border-b border-border mb-1">
-                                <p className="text-sm font-medium">admin@vela.com</p>
+                                <p className="text-sm font-medium">admin@alma.com</p>
                                 <p className="text-xs text-muted-foreground">ID: 8392-ADMIN</p>
                             </div>
                             <Link
