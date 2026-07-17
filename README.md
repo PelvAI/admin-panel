@@ -1,54 +1,44 @@
-# 🛠️ PelvIA Admin Panel
+# ALMA Platform — Admin Panel
 
-> **The central management interface for the PelvIA platform.**
+Panel de administración de **ALMA Platform**, la línea SaaS del sistema **ALMA Health Intelligence System**. Permite al equipo clínico gestionar formularios, reglas de scoring, segmentación de usuarias y contenido del sistema.
 
-The Admin Panel is a high-performance [Next.js](https://nextjs.org/) application designed for clinical staff and administrators to manage questionnaires, scoring rules, user segments (targets), and system content.
-
----
-
-## 🛠️ Tech Stack
-
+## 🛠️ Tecnologías
 - **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescript.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [Shadcn/UI](https://ui.shadcn.com/) & Radix UI
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **State/Data Fetching**: Native Fetch with async/await patterns
+- **Lenguaje**: TypeScript
+- **Estilos**: Tailwind CSS
+- **Iconos**: Lucide React
+
+## 🚀 Inicio Rápido
+
+1. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
+
+2. **Configuración de entorno:**
+   Copia `.env.example` a `.env.local` y configura la URL del backend:
+   ```bash
+   cp .env.example .env.local
+   ```
+   El valor `NEXT_PUBLIC_API_URL` debe apuntar al backend ALMA (puerto `8001` en local).
+
+3. **Ejecutar en desarrollo:**
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## 🚀 Getting Started
-
-1.  **Install dependencies:**
-    ```bash
-    npm install
-    # or
-    yarn install
-    ```
-
-2.  **Environment Configuration:**
-    - Copy `.env.example` to `.env.local`.
-    - Configure `NEXT_PUBLIC_API_URL` to point to your PelvIA Backend API.
-
-3.  **Run the development server:**
-    ```bash
-    npm run dev
-    ```
+## 🏗️ Estructura
+- `app/`: Next.js App Router (páginas y layouts).
+- `components/`: Componentes reutilizables de UI.
+- `lib/`: Cliente de API y utilidades compartidas.
+- `public/`: Assets estáticos e íconos.
 
 ---
 
-## 🏗️ Project Structure
-
-- `app/`: Next.js App Router (pages and layouts).
-- `components/`: Reusable UI components and complex form builders.
-- `lib/`: API client and shared utility functions.
-- `public/`: Static assets and icons.
-
----
-
-## 📜 Key Features
-
-- **Form Builder**: Sophisticated interface for creating multi-section clinical questionnaires.
-- **Rule Engine Editor**: Manage complex scoring logic and clinical alerts.
-- **Target Manager**: Define and manage user segments for automated clinical tagging.
-- **Responsive Design**: Optimized for desktop management and tablet review.
+## 📜 Funcionalidades Clave
+- **Form Builder**: Creación de cuestionarios clínicos multi-sección.
+- **Rule Engine**: Gestión de lógica de scoring y alertas clínicas.
+- **Target Manager**: Definición y gestión de segmentos de usuarias.
+- **Diseño Responsivo**: Optimizado para gestión en escritorio.

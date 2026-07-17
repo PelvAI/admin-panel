@@ -26,7 +26,7 @@ export default function LoginPage() {
                     <div className="h-16 w-48 relative mb-4">
                         <Image
                             src="/logo.svg"
-                            alt="PelvIA Logo"
+                            alt="Vela Logo"
                             fill
                             className="object-contain"
                             priority
@@ -50,7 +50,7 @@ export default function LoginPage() {
                             <input
                                 id="email"
                                 type="email"
-                                placeholder="admin@pelvia.com"
+                                placeholder="admin@vela.com"
                                 required
                                 className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                             />
@@ -107,7 +107,7 @@ export default function LoginPage() {
 
                 {/* Footer */}
                 <p className="text-center text-xs text-muted-foreground">
-                    &copy; {new Date().getFullYear()} PelvIA Health. Todos los derechos reservados.
+                    &copy; {new Date().getFullYear()} Vela Health. Todos los derechos reservados.
                 </p>
             </div>
         </div>

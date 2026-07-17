@@ -1,22 +1,21 @@
 import type { Metadata } from "next";
-import { Lato, Poppins } from "next/font/google";
+import { Outfit, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const lato = Lato({
-  variable: "--font-lato",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "900"],
 });
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "PelvIA Admin",
-  description: "Super Admin Dashboard for PelvIA",
+  title: "ALMA Platform",
+  description: "ALMA Health Intelligence System — Panel de Administración",
 };
 
 export default function RootLayout({
@@ -27,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${lato.variable} ${poppins.variable} antialiased bg-background text-foreground`}
+        className={`${outfit.variable} ${cormorant.variable} antialiased bg-background text-foreground`}
       >
         {children}
       </body>

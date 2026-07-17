@@ -7,7 +7,7 @@ import { Search, Filter, MoreHorizontal, Shield, Ban, Mail } from "lucide-react"
 const users = [
     { id: 1, name: "Ana García", email: "ana@example.com", role: "User", status: "Active", joined: "2023-10-15" },
     { id: 2, name: "Carlos López", email: "carlos@example.com", role: "User", status: "Active", joined: "2023-10-20" },
-    { id: 3, name: "Admin User", email: "admin@pelvia.com", role: "Admin", status: "Active", joined: "2023-09-01" },
+    { id: 3, name: "Admin User", email: "admin@vela.com", role: "Admin", status: "Active", joined: "2023-09-01" },
     { id: 4, name: "Maria Rodriguez", email: "maria@example.com", role: "User", status: "Inactive", joined: "2023-11-05" },
     { id: 5, name: "Sofia Martinez", email: "sofia@example.com", role: "User", status: "Active", joined: "2023-11-12" },
 ];
