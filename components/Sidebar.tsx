@@ -16,7 +16,7 @@ import {
     Megaphone,
     ChevronDown,
     Activity,
-    Target as TargetIcon
+    BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -54,6 +54,7 @@ const menuGroups = [
         title: "AI & Soporte",
         items: [
             { icon: MessageSquare, label: "Chat Control", href: "/chat" },
+            { icon: BookOpen, label: "Conocimiento RAG", href: "/knowledge" },
         ]
     }
 ];
@@ -93,7 +94,9 @@ export function Sidebar() {
                             {isOpen && (
                                 <div className="space-y-1 pl-2">
                                     {group.items.map((item) => {
-                                        const isActive = pathname === item.href;
+                                        const isActive =
+                                            pathname === item.href ||
+                                            (item.href !== "/" && pathname.startsWith(item.href + "/"));
                                         return (
                                             <Link
                                                 key={item.href}

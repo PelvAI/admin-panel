@@ -1,44 +1,83 @@
-# ALMA Platform — Admin Panel
+# 🛠️ ALMA Admin Panel
 
-Panel de administración de **ALMA Platform**, la línea SaaS del sistema **ALMA Health Intelligence System**. Permite al equipo clínico gestionar formularios, reglas de scoring, segmentación de usuarias y contenido del sistema.
+> **The central management interface for the ALMA (formerly Vela) platform.**
 
-## 🛠️ Tecnologías
+The Admin Panel is a [Next.js](https://nextjs.org/) application for clinical staff and administrators to manage questionnaires, scoring rules, user segments (targets), **RAG knowledge**, and conversation monitoring.
+
+**Rule:** the browser never calls the chatbot (`:8000`). All API traffic goes to the Alma backend (`NEXT_PUBLIC_API_URL`, typically `:8001/api/v1`).
+
+---
+
+## 🛠️ Tech Stack
+
 - **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS
-- **Iconos**: Lucide React
+- **Language**: [TypeScript](https://www.typescript.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **State/Data Fetching**: Native Fetch (`lib/api.ts`)
 
-## 🚀 Inicio Rápido
+---
 
-1. **Instalar dependencias:**
+## 🚀 Getting Started
+
+1. **Install dependencies:**
    ```bash
    npm install
    ```
 
-2. **Configuración de entorno:**
-   Copia `.env.example` a `.env.local` y configura la URL del backend:
-   ```bash
-   cp .env.example .env.local
-   ```
-   El valor `NEXT_PUBLIC_API_URL` debe apuntar al backend ALMA (puerto `8001` en local).
+2. **Environment Configuration:**
+   - Copy `.env.example` to `.env.local`.
+   - Set `NEXT_PUBLIC_API_URL` to the Alma Backend API (e.g. `http://localhost:8001/api/v1`).
 
-3. **Ejecutar en desarrollo:**
+3. **Run the development server:**
    ```bash
    npm run dev
    ```
 
----
-
-## 🏗️ Estructura
-- `app/`: Next.js App Router (páginas y layouts).
-- `components/`: Componentes reutilizables de UI.
-- `lib/`: Cliente de API y utilidades compartidas.
-- `public/`: Assets estáticos e íconos.
+4. **Login (MVP):**
+   - Open `/login`.
+   - Use `admin@vela.com` (maps to backend UID `test_uid_123`).
+   - Password is required in the form but not validated by the backend yet.
 
 ---
 
-## 📜 Funcionalidades Clave
-- **Form Builder**: Creación de cuestionarios clínicos multi-sección.
-- **Rule Engine**: Gestión de lógica de scoring y alertas clínicas.
-- **Target Manager**: Definición y gestión de segmentos de usuarias.
-- **Diseño Responsivo**: Optimizado para gestión en escritorio.
+## 🔐 Auth
+
+- Token stored in `localStorage` (`alma_admin_token`) after `/auth/login`.
+- `AuthGuard` on dashboard routes redirects to `/login` if missing.
+- `lib/api.ts` sends `Authorization: Bearer <token>` and clears session on 401.
+
+---
+
+## 📚 Integration features
+
+| Route | Purpose |
+|-------|---------|
+| `/clinical`, `/clinical/targets` | Forms & targets (existing, via backend) |
+| `/knowledge` | RAG docs: list, upload, patch indexed, delete, reindex, analytics summary |
+| `/chat` | Monitor: real conversations via `/admin/chat/*`; Sandbox marked “Próximamente” |
+
+Backend endpoints expected (see `plano_integracoes_backend.md`):
+
+- `/admin/rag/documents`, `/upload`, `PATCH/DELETE`, `/reindex/*`, `/analytics/*`
+- `/admin/chat/conversations`, `/admin/chat/conversations/{id}/messages`
+
+Until those exist, Knowledge and Monitor show errors from the API — clinical forms still work independently.
+
+---
+
+## 🏗️ Project Structure
+
+- `app/`: Next.js App Router (pages and layouts).
+- `components/`: UI (Sidebar, Topbar, AuthGuard).
+- `lib/`: API client, auth helpers, RAG types.
+- `public/`: Static assets.
+
+---
+
+## 📜 Key Features
+
+- **Form Builder**: Clinical questionnaires and scoring rules.
+- **Target Manager**: User segments for clinical tagging.
+- **Conocimiento RAG**: Staff ops for the assistant knowledge base (proxied by backend).
+- **Chat Monitor**: Read-only view of patient conversations (anonymized labels).

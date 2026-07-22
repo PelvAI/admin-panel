@@ -4,11 +4,20 @@ import { Search, Bell, ChevronDown, Settings, LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { clearSession, getStoredUser } from "@/lib/auth";
+
+type StoredUser = { email?: string };
 
 export function Topbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [userEmail, setUserEmail] = useState("admin@vela.com");
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+
+    useEffect(() => {
+        const user = getStoredUser<StoredUser>();
+        if (user?.email) setUserEmail(user.email);
+    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -19,6 +28,12 @@ export function Topbar() {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    function handleLogout() {
+        setIsDropdownOpen(false);
+        clearSession();
+        router.push("/login");
+    }
 
     return (
         <header className="flex h-16 items-center justify-between border-b border-border bg-white px-6 shadow-sm z-10 relative">
@@ -57,8 +72,8 @@ export function Topbar() {
                     {isDropdownOpen && (
                         <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-white shadow-lg py-1 animate-in fade-in zoom-in-95 duration-100">
                             <div className="px-3 py-2 border-b border-border mb-1">
-                                <p className="text-sm font-medium">admin@alma.com</p>
-                                <p className="text-xs text-muted-foreground">ID: 8392-ADMIN</p>
+                                <p className="text-sm font-medium">{userEmail}</p>
+                                <p className="text-xs text-muted-foreground">Staff ALMA</p>
                             </div>
                             <Link
                                 href="/settings"
@@ -71,10 +86,7 @@ export function Topbar() {
                             <div className="border-t border-border my-1" />
                             <button
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors mx-1 rounded-lg"
-                                onClick={() => {
-                                    setIsDropdownOpen(false);
-                                    router.push("/login");
-                                }}
+                                onClick={handleLogout}
                             >
                                 <LogOut className="h-4 w-4" />
                                 Cerrar Sesión
