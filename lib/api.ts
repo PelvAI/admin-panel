@@ -9,13 +9,24 @@ import type {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Types matching Backend FormListResponse
+export interface Target {
+  target_id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  is_active: boolean;
+}
+
 export interface ClinicalForm {
   form_id: string;
   code: string;
   title_key: string;
   version: number;
   status: string;
-  target: string;
+  // El backend devuelve la relación muchos-a-muchos completa, no un código
+  // suelto. La declaración anterior (`target: string`) no correspondía a
+  // ninguna respuesta real.
+  targets: Target[];
   frecuencia: string;
   is_active: boolean;
   question_count: number;

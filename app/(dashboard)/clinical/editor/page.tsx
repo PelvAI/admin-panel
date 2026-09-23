@@ -38,7 +38,7 @@ function ClinicalFormEditor() {
                 code: "",
                 title_key: "",
                 description_key: "",
-                target: "todas",
+                target_ids: [],
                 sections: [{
                     section_id: "temp_sec_1",
                     questions: [],
@@ -55,6 +55,9 @@ function ClinicalFormEditor() {
             if (!data.sections || data.sections.length === 0) {
                 data.sections = [{ section_id: "temp_sec_existing_empty", questions: [] }];
             }
+            // El backend devuelve los segmentos como objetos; el editor trabaja
+            // con la lista de ids que después envía al guardar.
+            data.target_ids = (data.targets || []).map((t: any) => t.target_id);
             setForm(data);
         } catch (err) {
             alert("Error cargando formulario");
@@ -183,7 +186,7 @@ function ClinicalFormEditor() {
                 code: form.code,
                 title_key: form.title_key,
                 description_key: form.description_key,
-                target: form.target,
+                target_ids: form.target_ids || [],
                 frecuencia: form.frecuencia,
                 disparador: form.disparador
             };

@@ -70,19 +70,46 @@ export function FormSettingsDialog({
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-muted-foreground uppercase">Target Principal</label>
-                                <select
-                                    value={form?.target || "todas"}
-                                    onChange={(e) => setForm({ ...form, target: e.target.value })}
-                                    className="w-full text-sm bg-muted/30 px-3 py-2 rounded-lg border border-input focus:border-primary focus:outline-none"
-                                >
-                                    <option value="todas">Todas</option>
-                                    <option value="embarazadas">Embarazadas</option>
-                                    <option value="post_parto">Post Parto</option>
-                                    <option value="menopausia">Menopausia</option>
-                                    <option value="lactancia">Lactancia</option>
-                                    <option value="deportista">Deportista</option>
-                                </select>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Segmentos</label>
+                                {targets.length === 0 ? (
+                                    <p className="text-xs text-muted-foreground py-2">
+                                        No hay segmentos cargados. Creá uno en Clínica → Segmentos.
+                                    </p>
+                                ) : (
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {targets.map((t) => {
+                                            const seleccionado = (form?.target_ids || []).includes(t.target_id);
+                                            return (
+                                                <button
+                                                    key={t.target_id}
+                                                    type="button"
+                                                    aria-pressed={seleccionado}
+                                                    onClick={() => {
+                                                        const actuales: string[] = form?.target_ids || [];
+                                                        setForm({
+                                                            ...form,
+                                                            target_ids: seleccionado
+                                                                ? actuales.filter((id) => id !== t.target_id)
+                                                                : [...actuales, t.target_id],
+                                                        });
+                                                    }}
+                                                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                                                        seleccionado
+                                                            ? "bg-primary text-primary-foreground border-primary"
+                                                            : "bg-muted/30 text-muted-foreground border-input hover:border-primary"
+                                                    }`}
+                                                >
+                                                    {t.name}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                <p className="text-[10px] text-muted-foreground">
+                                    {(form?.target_ids || []).length === 0
+                                        ? "Sin segmentos: el formulario alcanza a todas las usuarias."
+                                        : "El formulario solo se muestra a quienes tengan alguno de estos segmentos."}
+                                </p>
                             </div>
 
                             <div className="space-y-1.5">

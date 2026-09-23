@@ -11,13 +11,26 @@ interface ContextRulesMatrixProps {
     questionIdx: number;
 }
 
+/**
+ * Regla que combina varios segmentos sobre una misma opción.
+ *
+ * El tipo está nombrado a propósito: antes se repetía en línea en el estado y
+ * en su inicialización, las dos copias divergieron —una omitía `alert`— y eso
+ * dejó al panel sin poder compilarse para producción.
+ */
+type CombinedRule = {
+    id: string;
+    targets: string[];
+    score: number;
+    alert?: { type: string; message: string };
+};
+
 export function ContextRulesMatrix({ question, targets, onSave, onClose, questionIdx }: ContextRulesMatrixProps) {
     // Local state to manage the matrix edits before saving (Single Target)
     const [matrix, setMatrix] = useState<Record<string, Record<string, number>>>({});
 
-    // State for Combined Rules (Multi-target)
-    // Structure: { [optIdx]: Array<{ id: string, targets: string[], score: number, alert?: { type: string, message: string } }> }
-    const [combinedRules, setCombinedRules] = useState<Record<string, Array<{ id: string, targets: string[], score: number, alert?: { type: string, message: string } }>>>({});
+    // State for Combined Rules (Multi-target), indexado por optIdx.
+    const [combinedRules, setCombinedRules] = useState<Record<string, CombinedRule[]>>({});
 
     // UI State for new rule creation
     const [newRule, setNewRule] = useState<{ optIdx: number | null, targets: string[], score: string, alertType: string, alertMessage: string }>({
@@ -31,7 +44,7 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
     useEffect(() => {
         // Initialize matrix and combinedRules from existing context_rules
         const initialMatrix: Record<string, Record<string, number>> = {};
-        const initialCombined: Record<string, Array<{ id: string, targets: string[], score: number }>> = {};
+        const initialCombined: Record<string, CombinedRule[]> = {};
 
         question.options?.forEach((opt: any, optIdx: number) => {
             if (opt.context_rules) {
@@ -129,7 +142,6 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
             if (combinedRow) {
                 combinedRow.forEach(r => {
                     rules.push({
-                        conditions: { targets: r.targets },
                         conditions: { targets: r.targets },
                         override_score: r.score,
                         alert_config: r.alert ? { type: r.alert.type, message: r.alert.message } : null
