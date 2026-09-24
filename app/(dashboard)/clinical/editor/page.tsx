@@ -2,7 +2,7 @@
 // forcing recompile
 
 import { Suspense, useEffect, useState } from "react";
-import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Save, Loader2, X } from "lucide-react";
+import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Save, Loader2, X, Send, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -21,6 +21,7 @@ function ClinicalFormEditor() {
     const [form, setForm] = useState<any>(null);
     const [loading, setLoading] = useState(!!formId);
     const [saving, setSaving] = useState(false);
+    const [publicando, setPublicando] = useState(false);
     const [targets, setTargets] = useState<any[]>([]);
 
     // Matrix Modal State
@@ -149,6 +150,8 @@ function ClinicalFormEditor() {
             alert_condition: "",
             alert_type: "derivacion_clinica",
             target_id: null,
+            is_total: false,
+            interpretation_ranges: null,
             order_index: (form.scoring_rules?.length || 0) + 1
         };
         setForm({ ...form, scoring_rules: [...(form.scoring_rules || []), newRule] });
@@ -175,7 +178,38 @@ function ClinicalFormEditor() {
         setForm({ ...form, scoring_rules: newRules });
     };
 
-    const handleSave = async () => {
+    // Publicar y despublicar guardan primero: de lo contrario se publicaría la
+    // versión del servidor y no la que la persona tiene en pantalla.
+    const handlePublish = async () => {
+        if (!formId) return;
+        if (!confirm("Se guardan los cambios y el formulario pasa a estar visible para las usuarias. ¿Publicar?")) return;
+        setPublicando(true);
+        try {
+            await handleSave({ recargar: false });
+            const actualizado = await api.publishForm(formId);
+            setForm({ ...form, status: actualizado.status });
+        } catch (e: any) {
+            alert(e?.message || "No se pudo publicar");
+        } finally {
+            setPublicando(false);
+        }
+    };
+
+    const handleUnpublish = async () => {
+        if (!formId) return;
+        if (!confirm("Dejará de mostrarse en la app. Las respuestas ya cargadas no se tocan.")) return;
+        setPublicando(true);
+        try {
+            const actualizado = await api.unpublishForm(formId);
+            setForm({ ...form, status: actualizado.status });
+        } catch (e: any) {
+            alert(e?.message || "No se pudo despublicar");
+        } finally {
+            setPublicando(false);
+        }
+    };
+
+    const handleSave = async ({ recargar = true }: { recargar?: boolean } = {}) => {
         setSaving(true);
         try {
             let activeFormId = formId;
@@ -295,11 +329,13 @@ function ClinicalFormEditor() {
                 }
             }
 
-            alert("Guardado correctamente");
-            if (!formId) {
-                router.push(`/clinical/editor?id=${activeFormId}`);
-            } else {
-                window.location.reload(); // Reload to get fresh IDs
+            if (recargar) {
+                alert("Guardado correctamente");
+                if (!formId) {
+                    router.push(`/clinical/editor?id=${activeFormId}`);
+                } else {
+                    window.location.reload(); // Reload to get fresh IDs
+                }
             }
 
         } catch (e: any) {
@@ -341,14 +377,56 @@ function ClinicalFormEditor() {
                     <ArrowLeft className="h-5 w-5 text-muted-foreground" />
                 </Link>
                 <div>
-                    <h2 className="text-2xl font-bold font-heading text-foreground">
-                        {formId ? "Editar Formulario" : "Nuevo Formulario"}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">Diseña la estructura de tu evaluación clínica.</p>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-2xl font-bold font-heading text-foreground">
+                            {formId ? "Editar Formulario" : "Nuevo Formulario"}
+                        </h2>
+                        {formId && (
+                            <span
+                                className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    form.status === "active"
+                                        ? "bg-green-100 text-green-700"
+                                        : form.status === "archived"
+                                        ? "bg-gray-200 text-gray-600"
+                                        : "bg-amber-100 text-amber-800"
+                                }`}
+                            >
+                                {form.status === "active"
+                                    ? "Publicado"
+                                    : form.status === "archived"
+                                    ? "Archivado"
+                                    : "Borrador"}
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        {form.status === "active"
+                            ? "Está en vivo: lo que cambies acá lo ven las usuarias al guardar."
+                            : "Diseña la estructura de tu evaluación clínica."}
+                    </p>
                 </div>
                 <div className="ml-auto flex gap-2">
-                    <button className="px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted" onClick={() => handleSave()}>Vista Previa</button>
-                    <button onClick={handleSave} disabled={saving} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2">
+                    {formId && form.status === "draft" && (
+                        <button
+                            onClick={handlePublish}
+                            disabled={saving || publicando}
+                            className="px-4 py-2 text-sm font-medium border border-primary text-primary rounded-lg hover:bg-primary/5 flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {publicando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            Publicar
+                        </button>
+                    )}
+                    {formId && form.status === "active" && (
+                        <button
+                            onClick={handleUnpublish}
+                            disabled={saving || publicando}
+                            className="px-4 py-2 text-sm font-medium border border-border rounded-lg hover:bg-muted flex items-center gap-2 disabled:opacity-50"
+                        >
+                            {publicando ? <Loader2 className="h-4 w-4 animate-spin" /> : <EyeOff className="h-4 w-4" />}
+                            Despublicar
+                        </button>
+                    )}
+                    <button onClick={() => handleSave()} disabled={saving} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 flex items-center gap-2">
                         {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                         Guardar
                     </button>

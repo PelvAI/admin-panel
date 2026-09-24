@@ -98,10 +98,30 @@ export const api = {
     }),
 
   // Clinical Forms
-  getForms: async (page = 0, limit = 20): Promise<FormPagination> => {
-    return api.request<FormPagination>(
-      `/admin/forms?skip=${page * limit}&limit=${limit}`
-    );
+  getForms: async (
+    page = 0,
+    limit = 20,
+    status?: "draft" | "active" | "archived"
+  ): Promise<FormPagination> => {
+    const params = new URLSearchParams({
+      skip: String(page * limit),
+      limit: String(limit),
+    });
+    // Sin estado, el backend devuelve todo salvo lo archivado.
+    if (status) params.set("status", status);
+    return api.request<FormPagination>(`/admin/forms?${params}`);
+  },
+
+  publishForm: async (formId: string): Promise<any> => {
+    return api.request(`/admin/forms/${formId}/publish`, { method: "POST" });
+  },
+
+  unpublishForm: async (formId: string): Promise<any> => {
+    return api.request(`/admin/forms/${formId}/unpublish`, { method: "POST" });
+  },
+
+  restoreForm: async (formId: string): Promise<any> => {
+    return api.request(`/admin/forms/${formId}/restore`, { method: "POST" });
   },
 
   // Clinical methods keep `any` to match existing editor pages (MVP)
