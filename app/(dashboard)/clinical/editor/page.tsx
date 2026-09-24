@@ -406,6 +406,14 @@ function ClinicalFormEditor() {
                             ? "Está en vivo: lo que cambies acá lo ven las usuarias al guardar."
                             : "Diseña la estructura de tu evaluación clínica."}
                     </p>
+                    {form.submission_count > 0 && (
+                        <p className="text-xs text-amber-700 mt-1">
+                            {form.submission_count === 1
+                                ? "Ya hay 1 evaluación respondida con este formulario."
+                                : `Ya hay ${form.submission_count} evaluaciones respondidas con este formulario.`}{" "}
+                            Cambiar las preguntas altera el significado de esas respuestas.
+                        </p>
+                    )}
                 </div>
                 <div className="ml-auto flex gap-2">
                     {formId && form.status === "draft" && (
