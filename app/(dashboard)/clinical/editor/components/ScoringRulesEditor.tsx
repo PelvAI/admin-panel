@@ -11,6 +11,7 @@ interface ScoringRule {
     target_id: string | null;
     is_total: boolean;
     interpretation_ranges: Record<string, string> | null;
+    interpretation_validated: boolean;
     order_index: number;
 }
 
@@ -191,6 +192,21 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
                                         <p className="text-[10px] text-muted-foreground">
                                             Acepta <code>0-5</code>, <code>&gt;=10</code>, <code>&lt;3</code> o un número exacto. Gana el primero que coincide.
                                         </p>
+
+                                        <label className="flex items-start gap-2 cursor-pointer pt-1">
+                                            <input
+                                                type="checkbox"
+                                                checked={!!rule.interpretation_validated}
+                                                onChange={(e) => onUpdate(idx, 'interpretation_validated', e.target.checked)}
+                                                className="mt-0.5 accent-primary"
+                                            />
+                                            <span>
+                                                <span className="text-xs font-semibold text-foreground block">Umbrales confirmados por la clínica</span>
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    Decidir qué puntaje es "severo" es criterio médico. Sin confirmar, la etiqueta se muestra marcada como provisoria y no se usa para derivar ni asignar planes.
+                                                </span>
+                                            </span>
+                                        </label>
                                     </div>
                                 )}
                             </div>

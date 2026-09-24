@@ -152,6 +152,7 @@ function ClinicalFormEditor() {
             target_id: null,
             is_total: false,
             interpretation_ranges: null,
+            interpretation_validated: false,
             order_index: (form.scoring_rules?.length || 0) + 1
         };
         setForm({ ...form, scoring_rules: [...(form.scoring_rules || []), newRule] });
@@ -316,6 +317,7 @@ function ClinicalFormEditor() {
                     alert_type: r.alert_type,
                     target_id: r.target_id,
                     is_total: !!r.is_total,
+                    interpretation_validated: !!r.interpretation_validated,
                     // Solo tiene sentido en la regla que produce el total: es
                     // contra ese número que se comparan los rangos.
                     interpretation_ranges: r.is_total ? (r.interpretation_ranges || null) : null,
