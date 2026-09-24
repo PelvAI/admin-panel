@@ -154,6 +154,17 @@ export const api = {
     });
   },
 
+  updateSection: async (sectionId: string, data: any): Promise<any> => {
+    return api.request(`/admin/sections/${sectionId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteSection: async (sectionId: string): Promise<void> => {
+    return api.request<void>(`/admin/sections/${sectionId}`, { method: "DELETE" });
+  },
+
   createQuestion: async (sectionId: string, data: any): Promise<any> => {
     return api.request(`/admin/sections/${sectionId}/questions`, {
       method: "POST",

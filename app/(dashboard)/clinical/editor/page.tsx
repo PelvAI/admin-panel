@@ -2,7 +2,7 @@
 // forcing recompile
 
 import { Suspense, useEffect, useState } from "react";
-import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Save, Loader2, X, Send, EyeOff } from "lucide-react";
+import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Save, Loader2, X, Send, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -23,9 +23,14 @@ function ClinicalFormEditor() {
     const [saving, setSaving] = useState(false);
     const [publicando, setPublicando] = useState(false);
     const [targets, setTargets] = useState<any[]>([]);
+    // Borrados a aplicar al guardar. Ver registrarBorrado.
+    const [pendientes, setPendientes] = useState<{
+        questions: string[]; options: string[]; rules: string[]; sections: string[];
+    }>({ questions: [], options: [], rules: [], sections: [] });
 
     // Matrix Modal State
-    const [activeMatrixQuestionIdx, setActiveMatrixQuestionIdx] = useState<number | null>(null);
+    // La matriz de reglas ahora necesita saber de qué sección viene la pregunta.
+    const [activeMatrixQuestionIdx, setActiveMatrixQuestionIdx] = useState<{ secIdx: number; qIdx: number } | null>(null);
     const [showSettings, setShowSettings] = useState(false);
 
     useEffect(() => {
@@ -42,6 +47,9 @@ function ClinicalFormEditor() {
                 target_ids: [],
                 sections: [{
                     section_id: "temp_sec_1",
+                    title_key: "",
+                    bloque: "",
+                    order_index: 0,
                     questions: [],
                 }],
                 scoring_rules: []
@@ -54,7 +62,13 @@ function ClinicalFormEditor() {
             const data = await api.getForm(id);
             // Ensure at least one section exists
             if (!data.sections || data.sections.length === 0) {
-                data.sections = [{ section_id: "temp_sec_existing_empty", questions: [] }];
+                data.sections = [{
+                    section_id: "temp_sec_existing_empty",
+                    title_key: "",
+                    bloque: "",
+                    order_index: 0,
+                    questions: [],
+                }];
             }
             // El backend devuelve los segmentos como objetos; el editor trabaja
             // con la lista de ids que después envía al guardar.
@@ -67,78 +81,150 @@ function ClinicalFormEditor() {
         }
     };
 
-    const handleAddQuestion = () => {
-        const newQ = {
-            question_id: `temp_${Date.now()}`,
-            text_key: "",
-            type: "single", // Default
-            options: [],
-            order_index: (form.sections[0].questions.length || 0) + 1,
-            required: false
-        };
-
-        const newSections = [...form.sections];
-        newSections[0].questions.push(newQ);
-        setForm({ ...form, sections: newSections });
+    // Todo cambio es local hasta Guardar, borrados incluidos. Antes eliminar
+    // una pregunta impactaba el servidor de inmediato mientras el resto
+    // esperaba al botón: si alguien borraba y cerraba sin guardar, el borrado
+    // ya había ocurrido y no había forma de deshacerlo (F13).
+    const registrarBorrado = (tipo: "questions" | "options" | "rules" | "sections", id: string) => {
+        if (id.startsWith("temp_")) return; // nunca existió en el servidor
+        setPendientes((p) => ({ ...p, [tipo]: [...p[tipo], id] }));
     };
 
-    const handleDeleteQuestion = async (qIdx: number, qId: string) => {
-        if (!confirm("¿Eliminar pregunta?")) return;
-
-        // If it's a real question (not temp), delete from API immediately? 
-        // Or wait for save? User expectation on web is usually "Save to apply".
-        // BUT, we defined API logic to be granular deletions.
-        // Let's do immediate delete for Real IDs.
-        if (!qId.startsWith("temp_")) {
-            try {
-                await api.deleteQuestion(qId);
-            } catch (e) {
-                alert("Error eliminando del servidor");
-                return;
-            }
-        }
-
-        const newSections = [...form.sections];
-        newSections[0].questions.splice(qIdx, 1);
-        setForm({ ...form, sections: newSections });
+    const mutarSecciones = (cambio: (secciones: any[]) => void) => {
+        const secciones = form.sections.map((s: any) => ({
+            ...s,
+            questions: (s.questions || []).map((q: any) => ({
+                ...q,
+                options: q.options ? [...q.options] : q.options,
+            })),
+        }));
+        cambio(secciones);
+        setForm({ ...form, sections: secciones });
     };
 
-    const handleUpdateQuestion = (qIdx: number, field: string, value: any) => {
-        const newSections = [...form.sections];
-        newSections[0].questions[qIdx] = { ...newSections[0].questions[qIdx], [field]: value };
-        setForm({ ...form, sections: newSections });
-    };
+    // --- Secciones ---------------------------------------------------------
 
-    const handleAddOption = (qIdx: number) => {
-        const newSections = [...form.sections];
-        const q = newSections[0].questions[qIdx];
-        if (!q.options) q.options = [];
-
-        q.options.push({
-            option_id: `temp_opt_${Date.now()}`,
-            value: "", // Value stored in DB
-            label_key: "", // Display text
-            score: 0,
-            order_index: q.options.length
+    const handleAddSection = () => {
+        mutarSecciones((secciones) => {
+            secciones.push({
+                section_id: `temp_sec_${Date.now()}`,
+                title_key: "",
+                bloque: "",
+                order_index: secciones.length,
+                questions: [],
+            });
         });
-        setForm({ ...form, sections: newSections });
     };
 
-    const handleUpdateOption = (qIdx: number, optIdx: number, field: string, value: any) => {
-        const newSections = [...form.sections];
-        const opts = newSections[0].questions[qIdx].options;
-        opts[optIdx] = { ...opts[optIdx], [field]: value };
-        // Sync value to label for simple UX if label is empty
-        if (field === 'label_key' && !opts[optIdx].value) {
-            opts[optIdx].value = value.toLowerCase().replace(/\s+/g, '_');
-        }
-        setForm({ ...form, sections: newSections });
+    const handleUpdateSection = (secIdx: number, field: string, value: any) => {
+        mutarSecciones((secciones) => {
+            secciones[secIdx] = { ...secciones[secIdx], [field]: value };
+        });
     };
 
-    const handleDeleteOption = (qIdx: number, optIdx: number) => {
-        const newSections = [...form.sections];
-        newSections[0].questions[qIdx].options.splice(optIdx, 1);
-        setForm({ ...form, sections: newSections });
+    const handleDeleteSection = (secIdx: number) => {
+        const seccion = form.sections[secIdx];
+        const cuantas = (seccion.questions || []).length;
+        const aviso = cuantas > 0
+            ? `Se eliminará la sección y sus ${cuantas} pregunta(s). Se aplica al guardar.`
+            : "Se eliminará la sección al guardar.";
+        if (!confirm(aviso)) return;
+
+        registrarBorrado("sections", seccion.section_id);
+        mutarSecciones((secciones) => {
+            secciones.splice(secIdx, 1);
+            secciones.forEach((s, i) => { s.order_index = i; });
+        });
+    };
+
+    const handleMoveSection = (secIdx: number, direccion: -1 | 1) => {
+        const destino = secIdx + direccion;
+        if (destino < 0 || destino >= form.sections.length) return;
+        mutarSecciones((secciones) => {
+            const [movida] = secciones.splice(secIdx, 1);
+            secciones.splice(destino, 0, movida);
+            secciones.forEach((s, i) => { s.order_index = i; });
+        });
+    };
+
+    // --- Preguntas ---------------------------------------------------------
+
+    const handleAddQuestion = (secIdx: number) => {
+        mutarSecciones((secciones) => {
+            secciones[secIdx].questions.push({
+                question_id: `temp_${Date.now()}`,
+                text_key: "",
+                type: "single",
+                options: [],
+                order_index: secciones[secIdx].questions.length,
+                is_required: false,
+            });
+        });
+    };
+
+    const handleDeleteQuestion = (secIdx: number, qIdx: number, qId: string) => {
+        if (!confirm("Se eliminará la pregunta al guardar. ¿Continuar?")) return;
+        registrarBorrado("questions", qId);
+        mutarSecciones((secciones) => {
+            secciones[secIdx].questions.splice(qIdx, 1);
+            secciones[secIdx].questions.forEach((q: any, i: number) => { q.order_index = i; });
+        });
+    };
+
+    const handleMoveQuestion = (secIdx: number, qIdx: number, direccion: -1 | 1) => {
+        const destino = qIdx + direccion;
+        if (destino < 0 || destino >= form.sections[secIdx].questions.length) return;
+        mutarSecciones((secciones) => {
+            const preguntas = secciones[secIdx].questions;
+            const [movida] = preguntas.splice(qIdx, 1);
+            preguntas.splice(destino, 0, movida);
+            preguntas.forEach((q: any, i: number) => { q.order_index = i; });
+        });
+    };
+
+    const handleUpdateQuestion = (secIdx: number, qIdx: number, field: string, value: any) => {
+        mutarSecciones((secciones) => {
+            secciones[secIdx].questions[qIdx] = {
+                ...secciones[secIdx].questions[qIdx],
+                [field]: value,
+            };
+        });
+    };
+
+    // --- Opciones ----------------------------------------------------------
+
+    const handleAddOption = (secIdx: number, qIdx: number) => {
+        mutarSecciones((secciones) => {
+            const q = secciones[secIdx].questions[qIdx];
+            if (!q.options) q.options = [];
+            q.options.push({
+                option_id: `temp_opt_${Date.now()}`,
+                value: "",
+                label_key: "",
+                score: 0,
+                order_index: q.options.length,
+            });
+        });
+    };
+
+    const handleUpdateOption = (secIdx: number, qIdx: number, optIdx: number, field: string, value: any) => {
+        mutarSecciones((secciones) => {
+            const opts = secciones[secIdx].questions[qIdx].options;
+            opts[optIdx] = { ...opts[optIdx], [field]: value };
+            // El valor interno se deriva de la etiqueta mientras nadie lo haya
+            // fijado a mano.
+            if (field === "label_key" && !opts[optIdx].value) {
+                opts[optIdx].value = String(value).toLowerCase().replace(/\s+/g, "_");
+            }
+        });
+    };
+
+    const handleDeleteOption = (secIdx: number, qIdx: number, optIdx: number) => {
+        const opcion = form.sections[secIdx].questions[qIdx].options[optIdx];
+        registrarBorrado("options", opcion.option_id);
+        mutarSecciones((secciones) => {
+            secciones[secIdx].questions[qIdx].options.splice(optIdx, 1);
+        });
     };
 
     // --- Scoring Rules Handlers ---
@@ -164,16 +250,9 @@ function ClinicalFormEditor() {
         setForm({ ...form, scoring_rules: newRules });
     };
 
-    const handleDeleteRule = async (ruleIdx: number, ruleId: string) => {
-        if (!ruleId.startsWith("temp_")) {
-            if (!confirm("¿Eliminar regla permanentemente?")) return;
-            try {
-                await api.deleteScoringRule(ruleId);
-            } catch (e) {
-                alert("Error eliminando regla");
-                return;
-            }
-        }
+    const handleDeleteRule = (ruleIdx: number, ruleId: string) => {
+        if (!confirm("Se eliminará la regla al guardar. ¿Continuar?")) return;
+        registrarBorrado("rules", ruleId);
         const newRules = [...(form.scoring_rules || [])];
         newRules.splice(ruleIdx, 1);
         setForm({ ...form, scoring_rules: newRules });
@@ -214,9 +293,8 @@ function ClinicalFormEditor() {
         setSaving(true);
         try {
             let activeFormId = formId;
-            let activeSectionId = form.sections[0].section_id;
 
-            // 1. Create/Update Form Metadata
+            // 1. Metadatos del formulario
             const formData = {
                 code: form.code,
                 title_key: form.title_key,
@@ -229,87 +307,78 @@ function ClinicalFormEditor() {
             if (!activeFormId) {
                 const newForm = await api.createForm(formData);
                 activeFormId = newForm.form_id;
-
-                // Create Default Section
-                const newSec = await api.createSection(activeFormId!, {
-                    title_key: "Principal",
-                    bloque: "MAIN",
-                    order_index: 0
-                });
-                activeSectionId = newSec.section_id;
             } else {
                 await api.updateForm(activeFormId, formData);
-                // Find real section ID if we loaded it
-                const realSec = form.sections.find((s: any) => !s.section_id.startsWith('temp_'));
-                if (realSec) activeSectionId = realSec.section_id;
-                else {
-                    const newSec = await api.createSection(activeFormId!, { title_key: "Principal", bloque: "MAIN", order_index: 0 });
-                    activeSectionId = newSec.section_id;
-                }
             }
 
-            // 2. Sync Questions
-            const questions = form.sections[0].questions;
-            for (const q of questions) {
-                const payload = {
-                    variable_name: q.variable_name || q.text_key, // Fallback if empty
-                    text_key: q.text_key,
-                    type: q.type,
-                    order_index: q.order_index,
-                    help_text: q.help_text,
-                    show_if: q.show_if,
-                    is_required: q.is_required,
-                    // If options exist, backend creates them via Nested Pydantic in create_question?
-                    options: q.options?.map((o: any) => ({
+            // 2. Borrados pendientes, antes de crear nada: si alguien borró una
+            //    pregunta y agregó otra con el mismo código, el orden importa.
+            //    Las secciones van al final porque arrastran sus preguntas.
+            for (const id of pendientes.options) await api.deleteOption(id);
+            for (const id of pendientes.questions) await api.deleteQuestion(id);
+            for (const id of pendientes.rules) await api.deleteScoringRule(id);
+            for (const id of pendientes.sections) await api.deleteSection(id);
+
+            // 3. Secciones, cada una con sus preguntas
+            for (const [secIdx, section] of form.sections.entries()) {
+                const seccionPayload = {
+                    title_key: section.title_key || "",
+                    bloque: section.bloque || "",
+                    order_index: secIdx,
+                };
+
+                let sectionId = section.section_id;
+                if (sectionId.startsWith("temp_")) {
+                    const nueva = await api.createSection(activeFormId!, seccionPayload);
+                    sectionId = nueva.section_id;
+                } else {
+                    await api.updateSection(sectionId, seccionPayload);
+                }
+
+                for (const [qIdx, q] of (section.questions || []).entries()) {
+                    const opcionPayload = (o: any) => ({
                         value: o.value || o.label_key?.toLowerCase().replace(/\s+/g, '_') || "val",
                         label_key: o.label_key || "Opción",
                         score: o.score || 0,
-                        context_rules: o.context_rules, // Persist Granular Rules
+                        context_rules: o.context_rules,
                         order_index: o.order_index
-                    }))
-                };
+                    });
 
-                if (q.question_id.startsWith("temp_")) {
-                    await api.createQuestion(activeSectionId, payload);
-                } else {
-                    // Update: admin_forms.py update_question does NOT accept options list to replace.
-                    // It expects separate option endpoints.
-                    // For MVP simplicity, update metadata. 
-                    await api.updateQuestion(q.question_id, payload);
+                    const payload: any = {
+                        variable_name: q.variable_name || q.text_key,
+                        text_key: q.text_key,
+                        data_key: q.data_key,
+                        type: q.type,
+                        order_index: qIdx,
+                        help_text: q.help_text,
+                        show_if: q.show_if,
+                        is_required: q.is_required,
+                    };
 
-                    // Sync Options (Manual Diff)
-                    if (q.options) {
-                        for (const opt of q.options) {
-                            const optPayload = {
-                                value: opt.value || opt.label_key?.toLowerCase().replace(/\s+/g, '_') || "val",
-                                label_key: opt.label_key || "Opción",
-                                score: opt.score || 0,
-                                context_rules: opt.context_rules,
-                                order_index: opt.order_index
-                            };
+                    if (q.question_id.startsWith("temp_")) {
+                        // Las opciones viajan con la pregunta en la creación.
+                        await api.createQuestion(sectionId, {
+                            ...payload,
+                            options: (q.options || []).map(opcionPayload),
+                        });
+                    } else {
+                        await api.updateQuestion(q.question_id, payload);
 
+                        // Al actualizar, las opciones van por su propio camino.
+                        for (const opt of q.options || []) {
+                            const cuerpo = opcionPayload(opt);
                             if (opt.option_id && !opt.option_id.startsWith("temp_")) {
-                                try {
-                                    await api.updateOption(opt.option_id, optPayload);
-                                } catch (e) {
-                                    console.error("Failed to update option", opt.option_id, e);
-                                }
+                                await api.updateOption(opt.option_id, cuerpo);
                             } else {
-                                try {
-                                    // New Option
-                                    await api.createOption(q.question_id, optPayload);
-                                } catch (e) {
-                                    console.error("Failed to create option", e);
-                                }
+                                await api.createOption(q.question_id, cuerpo);
                             }
                         }
                     }
                 }
             }
 
-            // 3. Sync Scoring Rules
-            const rules = form.scoring_rules || [];
-            for (const r of rules) {
+            // 4. Reglas de puntuación
+            for (const r of form.scoring_rules || []) {
                 const payload = {
                     variable_name: r.variable_name,
                     formula: r.formula,
@@ -318,8 +387,6 @@ function ClinicalFormEditor() {
                     target_id: r.target_id,
                     is_total: !!r.is_total,
                     interpretation_validated: !!r.interpretation_validated,
-                    // Solo tiene sentido en la regla que produce el total: es
-                    // contra ese número que se comparan los rangos.
                     interpretation_ranges: r.is_total ? (r.interpretation_ranges || null) : null,
                     order_index: r.order_index
                 };
@@ -330,6 +397,8 @@ function ClinicalFormEditor() {
                     await api.updateScoringRule(r.rule_id, payload);
                 }
             }
+
+            setPendientes({ questions: [], options: [], rules: [], sections: [] });
 
             if (recargar) {
                 alert("Guardado correctamente");
@@ -370,7 +439,6 @@ function ClinicalFormEditor() {
         );
     }
 
-    const activeQuestions = form?.sections?.[0]?.questions || [];
 
     return (
         <div className="max-w-3xl mx-auto space-y-6 pb-20">
@@ -475,15 +543,85 @@ function ClinicalFormEditor() {
                         </button>
                     </div>
 
-                    {/* Questions List */}
-                    <div className="space-y-4">
-                        {activeQuestions.map((q: any, idx: number) => (
+                    {/* Secciones */}
+                    <div className="space-y-8">
+                        {form.sections.map((section: any, secIdx: number) => (
+                            <section key={section.section_id} className="space-y-4">
+                                {/* Cabecera de la sección */}
+                                <div className="flex items-center gap-2 bg-muted/40 rounded-xl px-4 py-3">
+                                    <span className="text-xs font-mono text-muted-foreground tabular-nums">
+                                        {secIdx + 1}
+                                    </span>
+                                    <input
+                                        type="text"
+                                        value={section.title_key || ""}
+                                        onChange={(e) => handleUpdateSection(secIdx, 'title_key', e.target.value)}
+                                        className="flex-1 font-semibold bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none py-1"
+                                        placeholder={`Sección ${secIdx + 1}`}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={section.bloque || ""}
+                                        onChange={(e) => handleUpdateSection(secIdx, 'bloque', e.target.value)}
+                                        className="w-40 text-xs font-mono bg-background px-2 py-1.5 rounded border border-input focus:border-primary focus:outline-none uppercase"
+                                        placeholder="BLOQUE"
+                                        title="Agrupación clínica, usada para analizar los resultados por bloque"
+                                    />
+                                    <button
+                                        onClick={() => handleMoveSection(secIdx, -1)}
+                                        disabled={secIdx === 0}
+                                        aria-label="Subir sección"
+                                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleMoveSection(secIdx, 1)}
+                                        disabled={secIdx === form.sections.length - 1}
+                                        aria-label="Bajar sección"
+                                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronDown className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteSection(secIdx)}
+                                        disabled={form.sections.length === 1}
+                                        aria-label="Eliminar sección"
+                                        title={form.sections.length === 1 ? "Un formulario necesita al menos una sección" : "Eliminar sección"}
+                                        className="p-1.5 text-muted-foreground hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                </div>
+
+                                {/* Preguntas de la sección */}
+                        {(section.questions || []).map((q: any, idx: number) => (
                             <div key={q.question_id || idx} className="group bg-card rounded-xl border border-border shadow-sm p-6 relative hover:shadow-md transition-all">
                                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-transparent group-hover:bg-primary/50 rounded-l-xl transition-colors" />
 
                                 {/* Delete Button */}
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleDeleteQuestion(idx, q.question_id)} className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-full">
+                                <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={() => handleMoveQuestion(secIdx, idx, -1)}
+                                        disabled={idx === 0}
+                                        aria-label="Subir pregunta"
+                                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleMoveQuestion(secIdx, idx, 1)}
+                                        disabled={idx === (section.questions || []).length - 1}
+                                        aria-label="Bajar pregunta"
+                                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronDown className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteQuestion(secIdx, idx, q.question_id)}
+                                        aria-label="Eliminar pregunta"
+                                        className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-full"
+                                    >
                                         <Trash2 className="h-5 w-5" />
                                     </button>
                                 </div>
@@ -495,7 +633,7 @@ function ClinicalFormEditor() {
                                             <input
                                                 type="text"
                                                 value={q.text_key || ""}
-                                                onChange={(e) => handleUpdateQuestion(idx, 'text_key', e.target.value)}
+                                                onChange={(e) => handleUpdateQuestion(secIdx, idx, 'text_key', e.target.value)}
                                                 className="w-full text-lg font-medium bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none transition-all placeholder:text-muted-foreground/50"
                                                 placeholder="Escribe la pregunta aquí..."
                                             />
@@ -504,7 +642,7 @@ function ClinicalFormEditor() {
                                                 <input
                                                     type="text"
                                                     value={q.variable_name || ""}
-                                                    onChange={(e) => handleUpdateQuestion(idx, 'variable_name', e.target.value)}
+                                                    onChange={(e) => handleUpdateQuestion(secIdx, idx, 'variable_name', e.target.value)}
                                                     className="bg-muted/50 px-2 py-1 rounded border-none focus:ring-1 focus:ring-primary w-40 font-mono text-muted-foreground"
                                                     placeholder="ID Variable (ej: edad)"
                                                     title="Nombre de variable para lógica (ej: edad, tiene_hijos)"
@@ -512,7 +650,7 @@ function ClinicalFormEditor() {
                                                 <input
                                                     type="text"
                                                     value={q.show_if || ""}
-                                                    onChange={(e) => handleUpdateQuestion(idx, 'show_if', e.target.value)}
+                                                    onChange={(e) => handleUpdateQuestion(secIdx, idx, 'show_if', e.target.value)}
                                                     className="bg-blue-50/50 px-2 py-1 rounded border-none focus:ring-1 focus:ring-primary flex-1 font-mono text-blue-600 placeholder:text-blue-300"
                                                     placeholder="Condición (ej: edad > 18)"
                                                     title="Lógica Show If (ej: pregunta_anterior == 'si')"
@@ -523,7 +661,7 @@ function ClinicalFormEditor() {
                                         <div className="flex flex-col gap-2">
                                             <select
                                                 value={q.type}
-                                                onChange={(e) => handleUpdateQuestion(idx, 'type', e.target.value)}
+                                                onChange={(e) => handleUpdateQuestion(secIdx, idx, 'type', e.target.value)}
                                                 className="w-40 px-3 py-2 rounded-lg border border-border bg-background text-sm font-medium"
                                             >
                                                 <optgroup label="Básicos">
@@ -547,7 +685,7 @@ function ClinicalFormEditor() {
                                                 <input
                                                     type="checkbox"
                                                     checked={q.is_required || false}
-                                                    onChange={(e) => handleUpdateQuestion(idx, 'is_required', e.target.checked)}
+                                                    onChange={(e) => handleUpdateQuestion(secIdx, idx, 'is_required', e.target.checked)}
                                                 />
                                             </div>
                                         </div>
@@ -557,7 +695,7 @@ function ClinicalFormEditor() {
                                     <input
                                         type="text"
                                         value={q.help_text || ""}
-                                        onChange={(e) => handleUpdateQuestion(idx, 'help_text', e.target.value)}
+                                        onChange={(e) => handleUpdateQuestion(secIdx, idx, 'help_text', e.target.value)}
                                         className="w-full text-xs text-muted-foreground bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none"
                                         placeholder="Texto de ayuda o subtítulo (opcional)"
                                     />
@@ -568,7 +706,7 @@ function ClinicalFormEditor() {
                                             <div className="flex justify-between items-center">
                                                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Opciones de Respuesta</label>
                                                 <button
-                                                    onClick={() => setActiveMatrixQuestionIdx(idx)}
+                                                    onClick={() => setActiveMatrixQuestionIdx({ secIdx, qIdx: idx })}
                                                     className="text-xs flex items-center gap-1 text-primary hover:bg-primary/10 px-2 py-1 rounded transition-colors"
                                                 >
                                                     <AlignLeft className="h-3 w-3" /> Configurar Reglas de Contexto
@@ -594,7 +732,7 @@ function ClinicalFormEditor() {
                                                                 className="w-full text-sm bg-transparent border-b border-transparent focus:border-primary outline-none"
                                                                 placeholder="Etiqueta"
                                                                 value={opt.label_key}
-                                                                onChange={(e) => handleUpdateOption(idx, optIdx, 'label_key', e.target.value)}
+                                                                onChange={(e) => handleUpdateOption(secIdx, idx, optIdx, 'label_key', e.target.value)}
                                                             />
                                                         </div>
                                                         <div className="col-span-3">
@@ -603,7 +741,7 @@ function ClinicalFormEditor() {
                                                                 placeholder="0"
                                                                 type="number"
                                                                 value={opt.score}
-                                                                onChange={(e) => handleUpdateOption(idx, optIdx, 'score', parseInt(e.target.value))}
+                                                                onChange={(e) => handleUpdateOption(secIdx, idx, optIdx, 'score', parseInt(e.target.value))}
                                                             />
                                                             {/* Visual indicator if context rules exist */}
                                                             {opt.context_rules && opt.context_rules.length > 0 && (
@@ -613,11 +751,11 @@ function ClinicalFormEditor() {
                                                             )}
                                                         </div>
                                                         <div className="col-span-1 text-right opacity-0 group-hover/opt:opacity-100">
-                                                            <button onClick={() => handleDeleteOption(idx, optIdx)}><X className="h-3 w-3 text-muted-foreground hover:text-red-500" /></button>
+                                                            <button onClick={() => handleDeleteOption(secIdx, idx, optIdx)}><X className="h-3 w-3 text-muted-foreground hover:text-red-500" /></button>
                                                         </div>
                                                     </div>
                                                 ))}
-                                                <button onClick={() => handleAddOption(idx)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1 mt-2">
+                                                <button onClick={() => handleAddOption(secIdx, idx)} className="text-xs text-primary font-medium hover:underline flex items-center gap-1 mt-2">
                                                     <Plus className="h-3 w-3" /> Añadir Opción
                                                 </button>
                                             </div>
@@ -634,24 +772,44 @@ function ClinicalFormEditor() {
                             </div>
                         ))}
 
-                        {activeQuestions.length === 0 && (
-                            <div className="text-center py-10 border-2 border-dashed border-border rounded-xl">
-                                <p className="text-muted-foreground">No hay preguntas aún.</p>
-                            </div>
-                        )}
+                                {(section.questions || []).length === 0 && (
+                                    <div className="text-center py-8 border-2 border-dashed border-border rounded-xl">
+                                        <p className="text-sm text-muted-foreground">Esta sección todavía no tiene preguntas.</p>
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => handleAddQuestion(secIdx)}
+                                    className="w-full py-2.5 border-2 border-dashed border-border rounded-xl text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Añadir pregunta
+                                </button>
+                            </section>
+                        ))}
+
+                        <button
+                            onClick={handleAddSection}
+                            className="w-full py-3 border-2 border-dashed border-border rounded-xl text-sm font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Añadir sección
+                        </button>
                     </div>
 
                     {/* Matrix Modal */}
-                    {activeMatrixQuestionIdx !== null && activeQuestions[activeMatrixQuestionIdx] && (
+                    {activeMatrixQuestionIdx !== null &&
+                        form.sections[activeMatrixQuestionIdx.secIdx]?.questions?.[activeMatrixQuestionIdx.qIdx] && (
                         <ContextRulesMatrix
-                            question={activeQuestions[activeMatrixQuestionIdx]}
+                            question={form.sections[activeMatrixQuestionIdx.secIdx].questions[activeMatrixQuestionIdx.qIdx]}
                             targets={targets}
-                            questionIdx={activeMatrixQuestionIdx}
+                            questionIdx={activeMatrixQuestionIdx.qIdx}
                             onClose={() => setActiveMatrixQuestionIdx(null)}
                             onSave={(qIdx, updatedOptions) => {
-                                const newSections = [...form.sections];
-                                newSections[0].questions[qIdx].options = updatedOptions;
-                                setForm({ ...form, sections: newSections });
+                                const { secIdx } = activeMatrixQuestionIdx;
+                                mutarSecciones((secciones) => {
+                                    secciones[secIdx].questions[qIdx].options = updatedOptions;
+                                });
                             }}
                         />
                     )}
@@ -668,16 +826,6 @@ function ClinicalFormEditor() {
                         onDeleteRule={handleDeleteRule}
                     />
 
-                    {/* Floating Add Button */}
-                    <div className="fixed right-8 bottom-8">
-                        <button
-                            onClick={handleAddQuestion}
-                            className="h-14 w-14 bg-primary text-primary-foreground shadow-lg rounded-full flex items-center justify-center hover:scale-105 transition-all"
-                            title="Añadir Pregunta"
-                        >
-                            <Plus className="h-7 w-7" />
-                        </button>
-                    </div>
                 </>
             )}
         </div>
