@@ -281,6 +281,10 @@ function ClinicalFormEditor() {
                     alert_condition: r.alert_condition,
                     alert_type: r.alert_type,
                     target_id: r.target_id,
+                    is_total: !!r.is_total,
+                    // Solo tiene sentido en la regla que produce el total: es
+                    // contra ese número que se comparan los rangos.
+                    interpretation_ranges: r.is_total ? (r.interpretation_ranges || null) : null,
                     order_index: r.order_index
                 };
 

@@ -9,6 +9,8 @@ interface ScoringRule {
     alert_condition: string;
     alert_type: string;
     target_id: string | null;
+    is_total: boolean;
+    interpretation_ranges: Record<string, string> | null;
     order_index: number;
 }
 
@@ -113,8 +115,84 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
                                             placeholder="ej: q1_freq + q2_amount + (q3 * 2)"
                                         />
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground mt-1">Usa los IDs de las preguntas (ej: <code>frequency</code>, <code>amount</code>) y operadores matemáticos (+, -, *, /).</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">Usa los IDs de las preguntas (ej: <code>frequency</code>, <code>amount</code>) y operadores matemáticos (+, -, *, /). Agregá <code>__valor</code> al ID para usar la respuesta en crudo en vez de su puntaje.</p>
                                 </div>
+
+                                <label className="flex items-start gap-2 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!rule.is_total}
+                                        onChange={(e) => onUpdate(idx, 'is_total', e.target.checked)}
+                                        className="mt-0.5 accent-primary"
+                                    />
+                                    <span>
+                                        <span className="text-xs font-semibold text-foreground block">Este es el puntaje total</span>
+                                        <span className="text-[10px] text-muted-foreground">
+                                            Es el número que ve la paciente al terminar. Marcá una sola regla por formulario.
+                                        </span>
+                                    </span>
+                                </label>
+
+                                {rule.is_total && (
+                                    <div className="space-y-2 pl-6">
+                                        <label className="text-[10px] font-bold text-muted-foreground uppercase block">
+                                            Interpretación del puntaje
+                                        </label>
+                                        {Object.entries(rule.interpretation_ranges || {}).map(
+                                            ([rango, etiqueta], i) => (
+                                                <div key={i} className="flex gap-1.5 items-center">
+                                                    <input
+                                                        type="text"
+                                                        value={rango}
+                                                        onChange={(e) => {
+                                                            const pares = Object.entries(rule.interpretation_ranges || {});
+                                                            pares[i] = [e.target.value, etiqueta];
+                                                            onUpdate(idx, 'interpretation_ranges', Object.fromEntries(pares));
+                                                        }}
+                                                        className="w-24 text-xs font-mono bg-muted/30 px-2 py-1.5 rounded border border-input focus:border-primary focus:outline-none"
+                                                        placeholder="0-5"
+                                                    />
+                                                    <input
+                                                        type="text"
+                                                        value={etiqueta}
+                                                        onChange={(e) => {
+                                                            const pares = Object.entries(rule.interpretation_ranges || {});
+                                                            pares[i] = [rango, e.target.value];
+                                                            onUpdate(idx, 'interpretation_ranges', Object.fromEntries(pares));
+                                                        }}
+                                                        className="flex-1 text-xs bg-muted/30 px-2 py-1.5 rounded border border-input focus:border-primary focus:outline-none"
+                                                        placeholder="Leve"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const pares = Object.entries(rule.interpretation_ranges || {});
+                                                            pares.splice(i, 1);
+                                                            onUpdate(idx, 'interpretation_ranges', Object.fromEntries(pares));
+                                                        }}
+                                                        className="text-muted-foreground hover:text-red-600 transition-colors"
+                                                        aria-label={`Quitar el rango ${rango}`}
+                                                    >
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                    </button>
+                                                </div>
+                                            )
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const actuales = rule.interpretation_ranges || {};
+                                                onUpdate(idx, 'interpretation_ranges', { ...actuales, "": "" });
+                                            }}
+                                            className="text-[11px] font-medium text-primary hover:underline"
+                                        >
+                                            + Agregar rango
+                                        </button>
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Acepta <code>0-5</code>, <code>&gt;=10</code>, <code>&lt;3</code> o un número exacto. Gana el primero que coincide.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Right Column: Alert/Action (Clean View) */}
