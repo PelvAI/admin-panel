@@ -125,6 +125,13 @@ export function FormSettingsDialog({
                                     <option value="mensual">Mensual</option>
                                     <option value="a_demanda">A Demanda</option>
                                 </select>
+                                <p className="text-[10px] text-muted-foreground">
+                                    {form?.frecuencia === "unica_vez" || !form?.frecuencia
+                                        ? "Se responde una sola vez y después queda marcado como completado."
+                                        : form?.frecuencia === "a_demanda"
+                                        ? "Siempre disponible: la usuaria decide cuándo repetirlo."
+                                        : "Vuelve a ofrecerse cumplido el período, contado desde la última respuesta. Los períodos salteados no se acumulan."}
+                                </p>
                             </div>
 
                             <div className="space-y-1.5">
@@ -140,6 +147,15 @@ export function FormSettingsDialog({
                                     <option value="dia_7">Día 7</option>
                                     <option value="dia_30">Día 30</option>
                                 </select>
+                                <p className="text-[10px] text-muted-foreground">
+                                    {form?.disparador === "manual"
+                                        ? "No aparece en el listado de la app: se llega por enlace directo."
+                                        : form?.disparador === "bloqueante"
+                                        ? "Encabeza el listado y se marca para que la usuaria empiece por ahí."
+                                        : form?.disparador === "dia_7" || form?.disparador === "dia_30"
+                                        ? "Recién aparece cumplido ese plazo desde que la usuaria se registró."
+                                        : "Disponible desde que la usuaria se registra."}
+                                </p>
                             </div>
                         </div>
 
