@@ -52,7 +52,10 @@ export default function TargetsPage() {
     const handleSave = async () => {
         try {
             if (editingTarget) {
-                await api.updateTarget(editingTarget.target_id, formData);
+                // El código es inmutable: se omite a propósito en vez de
+                // enviarlo para que el backend lo descarte en silencio.
+                const { code, ...editable } = formData;
+                await api.updateTarget(editingTarget.target_id, editable);
             } else {
                 await api.createTarget(formData);
             }
@@ -160,12 +163,17 @@ export default function TargetsPage() {
                                 <label className="text-sm font-medium">Código (Identificador Único)</label>
                                 <div className="relative">
                                     <input
-                                        className="w-full pl-3 pr-3 py-2 rounded-lg border border-input bg-muted/30 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all uppercase"
+                                        className="w-full pl-3 pr-3 py-2 rounded-lg border border-input bg-muted/30 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all uppercase disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="ATLETA_PRO"
                                         value={formData.code}
+                                        disabled={!!editingTarget}
                                         onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
                                     />
-                                    <p className="text-[10px] text-muted-foreground mt-1">Usado en reglas de lógica. Ej: ATHLETE, PREGNANT</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                        {editingTarget
+                                            ? "El código no se puede cambiar: la segmentación automática lo usa para reconocer el segmento."
+                                            : "Usado en reglas de lógica. Ej: ATHLETE, PREGNANT"}
+                                    </p>
                                 </div>
                             </div>
 
