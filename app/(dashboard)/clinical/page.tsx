@@ -14,6 +14,9 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, ClinicalForm } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { StatusPill } from "@/components/ui/StatusPill";
 
 type Vista = "todos" | "draft" | "active" | "archived";
 
@@ -24,10 +27,10 @@ const VISTAS: { id: Vista; etiqueta: string; vacio: string }[] = [
     { id: "archived", etiqueta: "Archivados", vacio: "No hay formularios archivados." },
 ];
 
-const ESTADOS: Record<string, { texto: string; clase: string }> = {
-    active: { texto: "Publicado", clase: "bg-green-100 text-green-700" },
-    draft: { texto: "Borrador", clase: "bg-amber-100 text-amber-800" },
-    archived: { texto: "Archivado", clase: "bg-gray-200 text-gray-600" },
+const ESTADOS: Record<string, { texto: string; tone: "success" | "warning" | "neutral" }> = {
+    active: { texto: "Publicado", tone: "success" },
+    draft: { texto: "Borrador", tone: "warning" },
+    archived: { texto: "Archivado", tone: "neutral" },
 };
 
 export default function ClinicalPage() {
@@ -93,19 +96,19 @@ export default function ClinicalPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Estudio Clínico</h2>
-                    <p className="text-muted-foreground">Diseña y gestiona los cuestionarios de evaluación.</p>
-                </div>
-                <Link
-                    href="/clinical/editor"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2"
-                >
-                    <Plus className="h-4 w-4" />
-                    Nuevo Formulario
-                </Link>
-            </div>
+            <PageHeader
+                title="Estudio Clínico"
+                description="Diseña y gestiona los cuestionarios de evaluación."
+                action={
+                    <Link
+                        href="/clinical/editor"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Nuevo Formulario
+                    </Link>
+                }
+            />
 
             <div className="flex gap-1 border-b border-border">
                 {VISTAS.map((v) => (
@@ -126,7 +129,7 @@ export default function ClinicalPage() {
             </div>
 
             {loading && <p className="text-muted-foreground">Cargando formularios...</p>}
-            {error && <p className="text-red-600">Error: {error}</p>}
+            {error && <p className="text-danger">Error: {error}</p>}
 
             {!loading && !error && forms.length === 0 && (
                 <div className="text-center py-10 bg-muted/30 rounded-xl">
@@ -136,21 +139,19 @@ export default function ClinicalPage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {forms.map((form) => {
-                    const estado = ESTADOS[form.status] ?? { texto: form.status, clase: "bg-gray-100 text-gray-700" };
+                    const estado = ESTADOS[form.status] ?? { texto: form.status, tone: "neutral" as const };
                     const trabajando = ocupado === form.form_id;
 
                     return (
-                        <div
+                        <Card
                             key={form.form_id}
-                            className="bg-card rounded-xl border border-border shadow-sm p-6 hover:shadow-md transition-all flex flex-col"
+                            className="hover:shadow-md transition-all flex flex-col"
                         >
                             <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                                <div className="p-3 bg-info-wash text-info rounded-lg">
                                     <FileText className="h-6 w-6" />
                                 </div>
-                                <span className={cn("px-2.5 py-0.5 rounded-full text-xs font-medium", estado.clase)}>
-                                    {estado.texto}
-                                </span>
+                                <StatusPill tone={estado.tone}>{estado.texto}</StatusPill>
                             </div>
 
                             <h3 className="text-lg font-bold font-heading mb-2">{form.code}</h3>
@@ -222,14 +223,14 @@ export default function ClinicalPage() {
                                             disabled={trabajando}
                                             title="Archivar"
                                             aria-label={`Archivar ${form.code}`}
-                                            className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                            className="p-2 text-muted-foreground hover:text-danger hover:bg-danger-wash rounded-lg transition-colors disabled:opacity-50"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
                                     </>
                                 )}
                             </div>
-                        </div>
+                        </Card>
                     );
                 })}
             </div>

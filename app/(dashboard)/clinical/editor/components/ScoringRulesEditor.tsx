@@ -1,6 +1,7 @@
 import { Trash2, AlertTriangle, Calculator, Activity, ArrowRight, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { RuleConfigDialog } from "./RuleConfigDialog";
+import { Card } from "@/components/ui/Card";
 
 interface ScoringRule {
     rule_id: string;
@@ -57,12 +58,12 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
         <div className="space-y-4">
             <div className="grid gap-4">
                 {rules.map((rule, idx) => (
-                    <div key={rule.rule_id || idx} className="group bg-card border border-border shadow-sm rounded-xl p-5 hover:border-primary/50 transition-colors relative">
+                    <Card key={rule.rule_id || idx} padding="sm" className="group hover:border-primary/50 transition-colors relative">
                         {/* Delete Action */}
                         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={() => onDelete(idx, rule.rule_id)}
-                                className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                className="p-2 text-muted-foreground hover:text-danger hover:bg-danger-wash rounded-full transition-colors"
                                 title="Eliminar regla"
                             >
                                 <Trash2 className="h-4 w-4" />
@@ -112,7 +113,7 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
                                             type="text"
                                             value={rule.formula || ""}
                                             onChange={(e) => onUpdate(idx, 'formula', e.target.value)}
-                                            className="w-full text-sm font-mono bg-blue-50/50 text-blue-900 px-3 py-2 rounded-lg border border-blue-100 focus:border-blue-500 focus:outline-none transition-all placeholder:text-blue-300"
+                                            className="w-full text-sm font-mono bg-info-wash text-info px-3 py-2 rounded-lg border border-info/20 focus:border-info focus:outline-none transition-all placeholder:text-info/40"
                                             placeholder="ej: q1_freq + q2_amount + (q3 * 2)"
                                         />
                                     </div>
@@ -171,7 +172,7 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
                                                             pares.splice(i, 1);
                                                             onUpdate(idx, 'interpretation_ranges', Object.fromEntries(pares));
                                                         }}
-                                                        className="text-muted-foreground hover:text-red-600 transition-colors"
+                                                        className="text-muted-foreground hover:text-danger transition-colors"
                                                         aria-label={`Quitar el rango ${rango}`}
                                                     >
                                                         <Trash2 className="h-3.5 w-3.5" />
@@ -213,16 +214,16 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
 
                             {/* Right Column: Alert/Action (Clean View) */}
                             <div className="md:col-span-4 space-y-4 pl-4 border-l border-border/50 h-full flex flex-col justify-center">
-                                <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-100 flex flex-col gap-3">
+                                <div className="p-4 bg-warning-wash rounded-xl border border-warning/20 flex flex-col gap-3">
                                     <div>
-                                        <label className="text-[10px] uppercase font-bold text-orange-600/80 mb-1 block">Estado de Alerta</label>
-                                        <div className="font-semibold text-orange-900 text-sm flex items-center gap-2">
+                                        <label className="text-[10px] uppercase font-bold text-gold-ink/80 mb-1 block">Estado de Alerta</label>
+                                        <div className="font-semibold text-gold-ink text-sm flex items-center gap-2">
                                             {rule.alert_type === 'derivacion_clinica' ? '🔴 Derivación' :
                                                 rule.alert_type === 'activar_plan' ? '🟡 Activar Plan' :
                                                     rule.alert_type === 'mensaje_app' ? '💬 Mensaje' : '🟢 Seguimiento'}
 
                                             {rule.alert_condition ? (
-                                                <span className="text-[10px] px-2 py-0.5 bg-white/50 rounded-full border border-orange-200 text-orange-700 truncate max-w-[120px]">
+                                                <span className="text-[10px] px-2 py-0.5 bg-card/50 rounded-full border border-warning/30 text-gold-ink truncate max-w-[120px]">
                                                     {rule.alert_condition}
                                                 </span>
                                             ) : (
@@ -233,14 +234,14 @@ export function ScoringRulesEditor({ rules, targets, onAdd, onUpdate, onDelete }
 
                                     <button
                                         onClick={() => setActiveRuleIdx(idx)}
-                                        className="w-full py-2 bg-white border border-orange-200 shadow-sm rounded-lg text-xs font-semibold text-orange-700 hover:bg-orange-50 hover:border-orange-300 transition-all flex items-center justify-center gap-2"
+                                        className="w-full py-2 bg-card border border-warning/30 shadow-sm rounded-lg text-xs font-semibold text-gold-ink hover:bg-warning-wash hover:border-warning/50 transition-all flex items-center justify-center gap-2"
                                     >
                                         <Settings2 className="h-3.5 w-3.5" /> Configurar Reglas Avanzadas
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
 

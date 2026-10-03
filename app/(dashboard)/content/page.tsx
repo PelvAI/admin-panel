@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { Search, Plus, Play, Clock, Tag, MoreVertical } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 // Mock Data
 const exercises = [
@@ -23,18 +27,18 @@ export default function ContentPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Biblioteca de Contenido</h2>
-                    <p className="text-muted-foreground">Gestiona los videos de ejercicios y material educativo.</p>
-                </div>
-                <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Nuevo Ejercicio
-                </button>
-            </div>
+            <PageHeader
+                title="Biblioteca de Contenido"
+                description="Gestiona los videos de ejercicios y material educativo."
+                action={
+                    <Button>
+                        <Plus className="h-4 w-4" />
+                        Nuevo Ejercicio
+                    </Button>
+                }
+            />
 
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-card p-4 rounded-xl border border-border shadow-sm">
+            <Card padding="sm" className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 w-full sm:w-auto">
                     {categories.map((cat) => (
                         <button
@@ -49,20 +53,15 @@ export default function ContentPage() {
                         </button>
                     ))}
                 </div>
-                <div className="relative w-full sm:w-64">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Buscar ejercicio..."
-                        className="w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
+                <div className="w-full sm:w-64">
+                    <Input type="text" placeholder="Buscar ejercicio..." icon={<Search className="h-4 w-4" />} />
                 </div>
-            </div>
+            </Card>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredExercises.map((ex) => (
-                    <div key={ex.id} className="group relative bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all overflow-hidden">
-                        <div className="aspect-video bg-gray-100 relative flex items-center justify-center">
+                    <Card key={ex.id} padding="none" className="group relative hover:shadow-md transition-all overflow-hidden">
+                        <div className="aspect-video bg-muted relative flex items-center justify-center">
                             {/* Placeholder for thumbnail */}
                             <div className="text-muted-foreground/20">
                                 <Play className="h-12 w-12 fill-current" />
@@ -74,14 +73,14 @@ export default function ContentPage() {
                             </div>
                             <div className="absolute top-2 right-2">
                                 <button className="p-1.5 bg-white/80 backdrop-blur-sm rounded-lg hover:bg-white transition-colors">
-                                    <MoreVertical className="h-4 w-4 text-gray-700" />
+                                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                 </button>
                             </div>
                         </div>
 
                         <div className="p-4">
                             <div className="flex items-start justify-between gap-2 mb-2">
-                                <h3 className="font-bold text-foreground line-clamp-1" title={ex.title}>{ex.title}</h3>
+                                <h3 className="text-base font-bold font-heading text-foreground line-clamp-1" title={ex.title}>{ex.title}</h3>
                             </div>
 
                             <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
@@ -104,7 +103,7 @@ export default function ContentPage() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
         </div>

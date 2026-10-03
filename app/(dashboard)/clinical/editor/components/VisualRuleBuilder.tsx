@@ -127,7 +127,7 @@ export function VisualRuleBuilder({ initialFormula, initialCondition, variables,
                         placeholder="Valor (ej: 10, 'si')"
                     />
 
-                    <button onClick={() => removeCondition(c.id)} className="p-1 text-muted-foreground hover:text-red-500">
+                    <button onClick={() => removeCondition(c.id)} className="p-1 text-muted-foreground hover:text-danger">
                         <X className="h-4 w-4" />
                     </button>
                 </div>

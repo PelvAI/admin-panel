@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { AlertCircle, Bot, Loader2, MessageSquare } from "lucide-react";
 import { api } from "@/lib/api";
 import type { AdminChatMessage, AdminConversationItem } from "@/lib/types/rag";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
 
 function formatTime(iso?: string): string {
   if (!iso) return "";
@@ -80,43 +82,41 @@ export default function ChatControlPage() {
 
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">
-            Chat Control
-          </h2>
-          <p className="text-muted-foreground">
-            Supervisa las conversaciones de pacientes (fuente: backend Alma).
-          </p>
-        </div>
-        <div className="flex bg-muted p-1 rounded-lg">
-          <button
-            onClick={() => setActiveTab("monitor")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "monitor"
-                ? "bg-white shadow-sm text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Monitor
-          </button>
-          <button
-            onClick={() => setActiveTab("sandbox")}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeTab === "sandbox"
-                ? "bg-white shadow-sm text-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Sandbox
-          </button>
-        </div>
+      <div className="mb-6">
+        <PageHeader
+          title="Chat Control"
+          description="Supervisa las conversaciones de pacientes (fuente: backend Alma)."
+          action={
+            <div className="flex bg-muted p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab("monitor")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === "monitor"
+                    ? "bg-card shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monitor
+              </button>
+              <button
+                onClick={() => setActiveTab("sandbox")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === "sandbox"
+                    ? "bg-card shadow-sm text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sandbox
+              </button>
+            </div>
+          }
+        />
       </div>
 
       {error && activeTab === "monitor" && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg border border-danger/20 bg-danger-wash px-4 py-3 text-sm text-danger">
           {error}
-          <span className="block text-xs mt-1 text-red-600/80">
+          <span className="block text-xs mt-1 text-danger/80">
             Requiere endpoints /admin/chat/* en el backend (ver plano de
             integración).
           </span>
@@ -125,9 +125,9 @@ export default function ChatControlPage() {
 
       {activeTab === "monitor" ? (
         <div className="flex-1 flex gap-6 overflow-hidden">
-          <div className="w-1/3 bg-card rounded-xl border border-border shadow-sm flex flex-col overflow-hidden">
+          <Card padding="none" className="w-1/3 flex flex-col overflow-hidden">
             <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
-              <h3 className="font-medium">Conversaciones Recientes</h3>
+              <h3 className="text-lg font-bold font-heading">Conversaciones Recientes</h3>
               {listLoading && (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               )}
@@ -164,12 +164,12 @@ export default function ChatControlPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
 
-          <div className="flex-1 bg-card rounded-xl border border-border shadow-sm flex flex-col">
+          <Card padding="none" className="flex-1 flex flex-col">
             <div className="p-4 border-b border-border flex justify-between items-center">
               <div>
-                <h3 className="font-bold flex items-center gap-2">
+                <h3 className="font-bold text-base flex items-center gap-2">
                   <MessageSquare className="h-4 w-4 text-primary" />
                   {selected ? anonLabel(selected) : "Selecciona una conversación"}
                 </h3>
@@ -184,7 +184,7 @@ export default function ChatControlPage() {
                   type="button"
                   disabled
                   title="Próximamente"
-                  className="px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700 rounded-lg opacity-50 cursor-not-allowed"
+                  className="px-3 py-1.5 text-xs font-medium bg-danger-wash text-danger rounded-lg opacity-50 cursor-not-allowed"
                 >
                   Marcar Error
                 </button>
@@ -227,7 +227,7 @@ export default function ChatControlPage() {
                     <div
                       className={`px-4 py-2 rounded-2xl max-w-[80%] ${
                         isUser
-                          ? "bg-white border border-border rounded-tl-none"
+                          ? "bg-card border border-border rounded-tl-none"
                           : "bg-primary text-primary-foreground rounded-tr-none"
                       }`}
                     >
@@ -253,11 +253,11 @@ export default function ChatControlPage() {
                 );
               })}
             </div>
-          </div>
+          </Card>
         </div>
       ) : (
         <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-md text-center space-y-4 bg-card border border-border rounded-xl p-8 shadow-sm">
+          <Card padding="lg" className="max-w-md text-center space-y-4">
             <div className="mx-auto h-12 w-12 rounded-full bg-muted flex items-center justify-center">
               <Bot className="h-6 w-6 text-primary" />
             </div>
@@ -267,14 +267,14 @@ export default function ChatControlPage() {
               chatbot PelvAI vía Alma. Esta pestaña no guarda ni envía nada al
               modelo hasta que el backend exponga un contrato de sandbox.
             </p>
-            <div className="flex items-start gap-2 text-left text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <div className="flex items-start gap-2 text-left text-xs text-gold-ink bg-warning-wash border border-warning/20 rounded-lg p-3">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
               <span>
                 Para probar el asistente, usa la app de la paciente (frontend) o
                 espera el endpoint admin de smoke test.
               </span>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </div>

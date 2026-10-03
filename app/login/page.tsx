@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { AlmaLogo } from "@/components/ui/AlmaLogo";
 import {
   clearSession,
   isAuthenticated,
@@ -15,7 +15,7 @@ import {
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("admin@vela.com");
+  const [email, setEmail] = useState("admin@alma.com");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -54,15 +54,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center space-y-2">
-          <div className="h-16 w-48 relative mb-4">
-            <Image
-              src="/logo.svg"
-              alt="Vela Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
+          <AlmaLogo layout="stacked" tagline className="mb-4" />
           <h1 className="text-3xl font-bold tracking-tight font-heading text-foreground">
             Admin Panel
           </h1>
@@ -74,7 +66,7 @@ export default function LoginPage() {
         <div className="bg-card border border-border rounded-2xl shadow-sm p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-lg border border-danger/20 bg-danger-wash px-4 py-3 text-sm text-danger">
                 {error}
               </div>
             )}
@@ -88,7 +80,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@vela.com"
+                placeholder="admin@alma.com"
                 required
                 className="w-full px-4 py-3 rounded-xl border border-input bg-background text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               />
@@ -124,7 +116,7 @@ export default function LoginPage() {
                 </button>
               </div>
               <p className="text-xs text-muted-foreground">
-                MVP: usa admin@vela.com (UID de desarrollo). La contraseña aún no se
+                MVP: usa admin@alma.com (UID de desarrollo). La contraseña aún no se
                 valida en el backend.
               </p>
             </div>
@@ -147,7 +139,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Vela Health. Todos los derechos
+          &copy; {new Date().getFullYear()} ALMA. Todos los derechos
           reservados.
         </p>
       </div>

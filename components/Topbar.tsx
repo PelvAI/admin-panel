@@ -10,7 +10,7 @@ type StoredUser = { email?: string };
 
 export function Topbar() {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [userEmail, setUserEmail] = useState("admin@vela.com");
+    const [userEmail, setUserEmail] = useState("admin@alma.com");
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
 
@@ -36,7 +36,7 @@ export function Topbar() {
     }
 
     return (
-        <header className="flex h-16 items-center justify-between border-b border-border bg-white px-6 shadow-sm z-10 relative">
+        <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 shadow-sm z-10 relative">
             <div className="flex items-center gap-4">
                 <div className="relative group">
                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -51,7 +51,7 @@ export function Topbar() {
             <div className="flex items-center gap-4">
                 <button className="relative rounded-full p-2 hover:bg-muted transition-colors">
                     <Bell className="h-5 w-5 text-muted-foreground" />
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
+                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-danger ring-2 ring-card" />
                 </button>
 
                 <div className="relative" ref={dropdownRef}>
@@ -63,14 +63,14 @@ export function Topbar() {
                             <p className="text-sm font-medium leading-none text-foreground">Admin User</p>
                             <p className="text-xs text-muted-foreground">Super Admin</p>
                         </div>
-                        <div className="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-500 font-bold border-2 border-white shadow-sm">
+                        <div className="h-9 w-9 rounded-full bg-identity-wash flex items-center justify-center text-identity font-bold border-2 border-white shadow-sm">
                             AU
                         </div>
                         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {isDropdownOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-white shadow-lg py-1 animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-card shadow-lg py-1 animate-in fade-in zoom-in-95 duration-100">
                             <div className="px-3 py-2 border-b border-border mb-1">
                                 <p className="text-sm font-medium">{userEmail}</p>
                                 <p className="text-xs text-muted-foreground">Staff ALMA</p>
@@ -85,7 +85,7 @@ export function Topbar() {
                             </Link>
                             <div className="border-t border-border my-1" />
                             <button
-                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors mx-1 rounded-lg"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger-wash transition-colors mx-1 rounded-lg"
                                 onClick={handleLogout}
                             >
                                 <LogOut className="h-4 w-4" />

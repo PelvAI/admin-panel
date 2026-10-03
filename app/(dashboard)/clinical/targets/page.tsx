@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, Plus, Edit2, Trash2, X, Save, Target } from "lucide-react"; // Using Target icon if available, else Users
+import { Users, Plus, Edit2, Trash2, Save, Target } from "lucide-react"; // Using Target icon if available, else Users
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/Modal";
 
 export default function TargetsPage() {
     const [targets, setTargets] = useState<any[]>([]);
@@ -79,24 +83,21 @@ export default function TargetsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Gestor de Targets</h2>
-                    <p className="text-muted-foreground">Define los perfiles de usuario (Etiquetas) para segmentación y scoring.</p>
-                </div>
-                <button
-                    onClick={() => handleOpenModal()}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2"
-                >
-                    <Plus className="h-4 w-4" />
-                    Nuevo Target
-                </button>
-            </div>
+            <PageHeader
+                title="Gestor de Targets"
+                description="Define los perfiles de usuario (Etiquetas) para segmentación y scoring."
+                action={
+                    <Button onClick={() => handleOpenModal()}>
+                        <Plus className="h-4 w-4" />
+                        Nuevo Target
+                    </Button>
+                }
+            />
 
             {/* List */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {targets.map((t) => (
-                    <div key={t.target_id} className="bg-card rounded-xl border border-border shadow-sm p-5 hover:border-primary/50 transition-colors group">
+                    <Card key={t.target_id} padding="sm" className="hover:border-primary/50 transition-colors group">
                         <div className="flex justify-between items-start mb-2">
                             <div className="p-2 bg-primary/10 text-primary rounded-lg">
                                 <Target className="h-5 w-5" />
@@ -105,7 +106,7 @@ export default function TargetsPage() {
                                 <button onClick={() => handleOpenModal(t)} className="p-1.5 text-muted-foreground hover:text-primary hover:bg-muted rounded">
                                     <Edit2 className="h-4 w-4" />
                                 </button>
-                                <button onClick={() => handleDelete(t.target_id)} className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded">
+                                <button onClick={() => handleDelete(t.target_id)} className="p-1.5 text-muted-foreground hover:text-danger hover:bg-danger-wash rounded">
                                     <Trash2 className="h-4 w-4" />
                                 </button>
                             </div>
@@ -119,7 +120,7 @@ export default function TargetsPage() {
                                 {t.description}
                             </p>
                         )}
-                    </div>
+                    </Card>
                 ))}
 
                 {!loading && targets.length === 0 && (
@@ -138,20 +139,16 @@ export default function TargetsPage() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-background rounded-xl shadow-2xl w-full max-w-md flex flex-col animate-in fade-in zoom-in-95 duration-200">
-                        <div className="p-5 border-b border-border flex justify-between items-center bg-muted/20 rounded-t-xl">
-                            <h3 className="text-lg font-bold">{editingTarget ? "Editar Target" : "Nuevo Target"}</h3>
-                            <button onClick={() => setIsModalOpen(false)} className="p-1 hover:bg-muted rounded-full transition-colors">
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
+                <Modal className="max-w-md">
+                    <ModalHeader onClose={() => setIsModalOpen(false)}>
+                        <h3 className="text-lg font-bold">{editingTarget ? "Editar Target" : "Nuevo Target"}</h3>
+                    </ModalHeader>
 
-                        <div className="p-6 space-y-4">
+                    <ModalBody className="space-y-4">
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Nombre (Público/Interno)</label>
-                                <input
-                                    className="w-full px-3 py-2 rounded-lg border border-input bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                <Input
+                                    className="bg-transparent"
                                     placeholder="Ej: Atleta de Alto Rendimiento"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -161,9 +158,9 @@ export default function TargetsPage() {
 
                             <div className="space-y-1.5">
                                 <label className="text-sm font-medium">Código (Identificador Único)</label>
-                                <div className="relative">
-                                    <input
-                                        className="w-full pl-3 pr-3 py-2 rounded-lg border border-input bg-muted/30 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all uppercase disabled:opacity-60 disabled:cursor-not-allowed"
+                                <div>
+                                    <Input
+                                        className="bg-muted/30 font-mono uppercase"
                                         placeholder="ATLETA_PRO"
                                         value={formData.code}
                                         disabled={!!editingTarget}
@@ -186,23 +183,18 @@ export default function TargetsPage() {
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
-                        </div>
+                    </ModalBody>
 
-                        <div className="p-5 border-t border-border flex justify-end gap-3 bg-muted/10 rounded-b-xl">
-                            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors">
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                disabled={!formData.name || !formData.code}
-                                className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg flex items-center gap-2 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
-                            >
-                                <Save className="h-4 w-4" />
-                                Guardar Target
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    <ModalFooter>
+                        <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
+                            Cancelar
+                        </Button>
+                        <Button onClick={handleSave} disabled={!formData.name || !formData.code}>
+                            <Save className="h-4 w-4" />
+                            Guardar Target
+                        </Button>
+                    </ModalFooter>
+                </Modal>
             )}
         </div>
     );

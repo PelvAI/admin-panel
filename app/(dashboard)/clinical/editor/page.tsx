@@ -1,15 +1,16 @@
 "use client";
-// forcing recompile
 
 import { Suspense, useEffect, useState } from "react";
-import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Save, Loader2, X, Send, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Trash2, GripVertical, Image as ImageIcon, CheckSquare, AlignLeft, ArrowLeft, Loader2, X, Send, EyeOff, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ContextRulesMatrix } from "./components/ContextRulesMatrix";
-import { ScoringRulesEditor } from "./components/ScoringRulesEditor";
 import { Settings } from "lucide-react";
 import { FormSettingsDialog } from "./components/FormSettingsDialog";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { StatusPill } from "@/components/ui/StatusPill";
 
 function ClinicalFormEditor() {
     const searchParams = useSearchParams();
@@ -448,25 +449,25 @@ function ClinicalFormEditor() {
                 </Link>
                 <div>
                     <div className="flex items-center gap-2">
-                        <h2 className="text-2xl font-bold font-heading text-foreground">
+                        <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">
                             {formId ? "Editar Formulario" : "Nuevo Formulario"}
                         </h2>
                         {formId && (
-                            <span
-                                className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            <StatusPill
+                                tone={
                                     form.status === "active"
-                                        ? "bg-green-100 text-green-700"
+                                        ? "success"
                                         : form.status === "archived"
-                                        ? "bg-gray-200 text-gray-600"
-                                        : "bg-amber-100 text-amber-800"
-                                }`}
+                                        ? "neutral"
+                                        : "warning"
+                                }
                             >
                                 {form.status === "active"
                                     ? "Publicado"
                                     : form.status === "archived"
                                     ? "Archivado"
                                     : "Borrador"}
-                            </span>
+                            </StatusPill>
                         )}
                     </div>
                     <p className="text-sm text-muted-foreground">
@@ -475,7 +476,7 @@ function ClinicalFormEditor() {
                             : "Diseña la estructura de tu evaluación clínica."}
                     </p>
                     {form.submission_count > 0 && (
-                        <p className="text-xs text-amber-700 mt-1">
+                        <p className="text-xs text-gold-ink mt-1">
                             {form.submission_count === 1
                                 ? "Ya hay 1 evaluación respondida con este formulario."
                                 : `Ya hay ${form.submission_count} evaluaciones respondidas con este formulario.`}{" "}
@@ -520,7 +521,7 @@ function ClinicalFormEditor() {
             ) : (
                 <>
                     {/* Form Header */}
-                    <div className="bg-card rounded-xl border-t-8 border-t-primary border-x border-b border-border shadow-sm p-6 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+                    <Card className="border-t-8 border-t-primary flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                         <div className="flex-1 w-full">
                             <input
                                 type="text"
@@ -534,14 +535,11 @@ function ClinicalFormEditor() {
                             </p>
                         </div>
 
-                        <button
-                            onClick={() => setShowSettings(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-lg shadow-sm hover:bg-muted transition-colors text-sm font-medium text-foreground whitespace-nowrap"
-                        >
+                        <Button variant="outline" onClick={() => setShowSettings(true)} className="shadow-sm whitespace-nowrap">
                             <Settings className="h-4 w-4 text-muted-foreground" />
                             Configuración Avanzada
-                        </button>
-                    </div>
+                        </Button>
+                    </Card>
 
                     {/* Secciones */}
                     <div className="space-y-8">
@@ -588,7 +586,7 @@ function ClinicalFormEditor() {
                                         disabled={form.sections.length === 1}
                                         aria-label="Eliminar sección"
                                         title={form.sections.length === 1 ? "Un formulario necesita al menos una sección" : "Eliminar sección"}
-                                        className="p-1.5 text-muted-foreground hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        className="p-1.5 text-muted-foreground hover:text-danger disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
@@ -596,8 +594,8 @@ function ClinicalFormEditor() {
 
                                 {/* Preguntas de la sección */}
                         {(section.questions || []).map((q: any, idx: number) => (
-                            <div key={q.question_id || idx} className="group bg-card rounded-xl border border-border shadow-sm p-6 relative hover:shadow-md transition-all">
-                                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-transparent group-hover:bg-primary/50 rounded-l-xl transition-colors" />
+                            <Card key={q.question_id || idx} className="group relative hover:shadow-md transition-all">
+                                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-transparent group-hover:bg-primary/50 rounded-l-lg transition-colors" />
 
                                 {/* Delete Button */}
                                 <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -620,7 +618,7 @@ function ClinicalFormEditor() {
                                     <button
                                         onClick={() => handleDeleteQuestion(secIdx, idx, q.question_id)}
                                         aria-label="Eliminar pregunta"
-                                        className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-full"
+                                        className="p-2 text-muted-foreground hover:text-danger hover:bg-danger-wash rounded-full"
                                     >
                                         <Trash2 className="h-5 w-5" />
                                     </button>
@@ -651,7 +649,7 @@ function ClinicalFormEditor() {
                                                     type="text"
                                                     value={q.show_if || ""}
                                                     onChange={(e) => handleUpdateQuestion(secIdx, idx, 'show_if', e.target.value)}
-                                                    className="bg-blue-50/50 px-2 py-1 rounded border-none focus:ring-1 focus:ring-primary flex-1 font-mono text-blue-600 placeholder:text-blue-300"
+                                                    className="bg-info-wash px-2 py-1 rounded border-none focus:ring-1 focus:ring-primary flex-1 font-mono text-info placeholder:text-info/40"
                                                     placeholder="Condición (ej: edad > 18)"
                                                     title="Lógica Show If (ej: pregunta_anterior == 'si')"
                                                 />
@@ -704,7 +702,7 @@ function ClinicalFormEditor() {
                                     {(q.type === 'single' || q.type === 'multi' || q.type === 'dropdown' || q.type === 'ranking') && (
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Opciones de Respuesta</label>
+                                                <label className="text-xs font-semibold text-muted-foreground font-mono uppercase tracking-label">Opciones de Respuesta</label>
                                                 <button
                                                     onClick={() => setActiveMatrixQuestionIdx({ secIdx, qIdx: idx })}
                                                     className="text-xs flex items-center gap-1 text-primary hover:bg-primary/10 px-2 py-1 rounded transition-colors"
@@ -751,7 +749,7 @@ function ClinicalFormEditor() {
                                                             )}
                                                         </div>
                                                         <div className="col-span-1 text-right opacity-0 group-hover/opt:opacity-100">
-                                                            <button onClick={() => handleDeleteOption(secIdx, idx, optIdx)}><X className="h-3 w-3 text-muted-foreground hover:text-red-500" /></button>
+                                                            <button onClick={() => handleDeleteOption(secIdx, idx, optIdx)}><X className="h-3 w-3 text-muted-foreground hover:text-danger" /></button>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -764,12 +762,12 @@ function ClinicalFormEditor() {
 
                                     {/* Info Block Preview */}
                                     {q.type === 'info' && (
-                                        <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800 border border-blue-100">
+                                        <div className="bg-info-wash p-3 rounded-lg text-sm text-info border border-info/20">
                                             Este bloque se mostrará como texto informativo sin requerir respuesta.
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </Card>
                         ))}
 
                                 {(section.questions || []).length === 0 && (

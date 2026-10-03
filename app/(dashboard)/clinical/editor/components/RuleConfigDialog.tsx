@@ -1,5 +1,7 @@
-import { X, Save, AlertTriangle } from "lucide-react";
+import { Save, AlertTriangle } from "lucide-react";
 import { VisualRuleBuilder } from "./VisualRuleBuilder";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface RuleConfigDialogProps {
     isOpen: boolean;
@@ -34,27 +36,19 @@ export function RuleConfigDialog({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-2xl rounded-xl shadow-2xl border border-border flex flex-col max-h-[90vh]">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-border">
-                    <div>
-                        <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-orange-500" />
-                            {title}
-                        </h2>
-                        {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
-                    </div>
-                    <button onClick={onClose} className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors">
-                        <X className="h-5 w-5" />
-                    </button>
-                </div>
+        <Modal className="max-h-[90vh]">
+            <ModalHeader onClose={onClose}>
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-warning" />
+                    {title}
+                </h2>
+                {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
+            </ModalHeader>
 
-                {/* Body */}
-                <div className="p-6 space-y-8 overflow-y-auto flex-1">
+            <ModalBody className="space-y-8">
                     {/* Visual Builder Section */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+                        <label className="text-xs font-bold text-muted-foreground font-mono uppercase tracking-label block">
                             Condiciones Lógicas
                         </label>
                         <div className="p-4 bg-muted/30 rounded-lg border border-border/50">
@@ -72,7 +66,7 @@ export function RuleConfigDialog({
 
                     {/* Action Section */}
                     <div className="space-y-3">
-                        <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+                        <label className="text-xs font-bold text-muted-foreground font-mono uppercase tracking-label block">
                             Acción a Disparar
                         </label>
                         <select
@@ -89,24 +83,16 @@ export function RuleConfigDialog({
                             Determina qué sucede en la aplicación del usuario cuando se cumple la condición.
                         </p>
                     </div>
-                </div>
+            </ModalBody>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-border bg-muted/10 flex justify-end gap-3 rounded-b-xl">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
-                    >
-                        Cerrar
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="px-6 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2"
-                    >
-                        <Save className="h-4 w-4" /> Guardar Configuración
-                    </button>
-                </div>
-            </div>
-        </div>
+            <ModalFooter>
+                <Button variant="ghost" onClick={onClose}>
+                    Cerrar
+                </Button>
+                <Button onClick={onClose}>
+                    <Save className="h-4 w-4" /> Guardar Configuración
+                </Button>
+            </ModalFooter>
+        </Modal>
     );
 }

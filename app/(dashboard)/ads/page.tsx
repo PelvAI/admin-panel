@@ -1,6 +1,10 @@
 "use client";
 
 import { Plus, MoreVertical, Play, Pause, Edit2, Trash2, Image as ImageIcon } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { StatusPill } from "@/components/ui/StatusPill";
 
 const campaigns = [
     { id: 1, name: "Promo Verano", type: "Banner Home", status: "Active", impressions: "12.5k", clicks: "450", ctr: "3.6%" },
@@ -11,20 +15,20 @@ const campaigns = [
 export default function AdsPage() {
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Publicidad Interna</h2>
-                    <p className="text-muted-foreground">Gestiona campañas para usuarios gratuitos.</p>
-                </div>
-                <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium transition-colors shadow-sm flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    Nueva Campaña
-                </button>
-            </div>
+            <PageHeader
+                title="Publicidad Interna"
+                description="Gestiona campañas para usuarios gratuitos."
+                action={
+                    <Button>
+                        <Plus className="h-4 w-4" />
+                        Nueva Campaña
+                    </Button>
+                }
+            />
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {campaigns.map((ad) => (
-                    <div key={ad.id} className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+                    <Card key={ad.id} padding="none" className="overflow-hidden">
                         <div className="h-32 bg-muted flex items-center justify-center relative">
                             <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
                             <div className="absolute top-2 right-2 px-2 py-1 bg-black/50 text-white text-xs rounded backdrop-blur-sm">
@@ -34,11 +38,10 @@ export default function AdsPage() {
 
                         <div className="p-4">
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-foreground">{ad.name}</h3>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ad.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                                    }`}>
+                                <h3 className="text-lg font-bold font-heading text-foreground">{ad.name}</h3>
+                                <StatusPill tone={ad.status === 'Active' ? 'success' : 'warning'}>
                                     {ad.status}
-                                </span>
+                                </StatusPill>
                             </div>
 
                             <div className="grid grid-cols-3 gap-2 mt-4 text-center">
@@ -52,7 +55,7 @@ export default function AdsPage() {
                                 </div>
                                 <div className="p-2 bg-muted/30 rounded-lg">
                                     <p className="text-xs text-muted-foreground">CTR</p>
-                                    <p className="font-bold text-sm text-green-600">{ad.ctr}</p>
+                                    <p className="font-bold text-sm text-success">{ad.ctr}</p>
                                 </div>
                             </div>
 
@@ -61,7 +64,7 @@ export default function AdsPage() {
                                 <button className="flex-1 py-1.5 text-xs font-medium border border-border rounded hover:bg-muted">Pausar</button>
                             </div>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
         </div>

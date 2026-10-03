@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { BookOpen, Loader2, RefreshCw, Trash2, Upload } from "lucide-react";
 import { api } from "@/lib/api";
 import type { RagDocument, ReindexStatus } from "@/lib/types/rag";
+import { Card } from "@/components/ui/Card";
+import { Table, TableHead, TableBody, TableRow, Th, Td } from "@/components/ui/Table";
 
 export default function KnowledgePage() {
   const [docs, setDocs] = useState<RagDocument[]>([]);
@@ -97,7 +99,7 @@ export default function KnowledgePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold font-heading flex items-center gap-2">
+        <h2 className="text-3xl font-bold tracking-tight font-heading flex items-center gap-2">
           <BookOpen className="h-8 w-8 text-primary" />
           Conocimiento RAG
         </h2>
@@ -107,18 +109,18 @@ export default function KnowledgePage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="rounded-lg border border-warning/20 bg-warning-wash px-4 py-3 text-sm text-gold-ink">
         Solo fuentes confiables. El texto ingerido se trata como no confiable por
         el asistente (no sustituye valoración clínica).
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-danger/20 bg-danger-wash px-4 py-3 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+      <Card className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-background text-sm font-medium cursor-pointer hover:bg-muted transition-colors disabled:opacity-50">
             <Upload className="h-4 w-4" />
@@ -161,11 +163,11 @@ export default function KnowledgePage() {
             {JSON.stringify(status, null, 2)}
           </pre>
         )}
-      </div>
+      </Card>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <Card padding="none" className="overflow-hidden">
         <div className="p-4 border-b border-border bg-muted/30 flex items-center justify-between">
-          <h3 className="font-medium">Documentos</h3>
+          <h3 className="text-lg font-bold font-heading">Documentos</h3>
           {busy && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
 
@@ -182,27 +184,27 @@ export default function KnowledgePage() {
             </span>
           </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/30 text-left">
+          <Table>
+            <TableHead>
               <tr>
-                <th className="p-3">Archivo</th>
-                <th className="p-3">Indexado</th>
-                <th className="p-3">Acciones</th>
+                <Th>Archivo</Th>
+                <Th>Indexado</Th>
+                <Th>Acciones</Th>
               </tr>
-            </thead>
-            <tbody>
+            </TableHead>
+            <TableBody>
               {docs.map((d) => (
-                <tr key={d.id} className="border-t border-border">
-                  <td className="p-3">
+                <TableRow key={d.id}>
+                  <Td>
                     <div className="font-medium">{d.filename}</div>
                     {d.rel_path && (
                       <div className="text-xs text-muted-foreground truncate max-w-md">
                         {d.rel_path}
                       </div>
                     )}
-                  </td>
-                  <td className="p-3">{d.indexed ? "Sí" : "No"}</td>
-                  <td className="p-3 space-x-3">
+                  </Td>
+                  <Td>{d.indexed ? "Sí" : "No"}</Td>
+                  <Td className="space-x-3">
                     <button
                       type="button"
                       disabled={busy}
@@ -214,22 +216,22 @@ export default function KnowledgePage() {
                     <button
                       type="button"
                       disabled={busy}
-                      className="text-red-600 text-xs font-medium inline-flex items-center gap-1 disabled:opacity-50"
+                      className="text-danger text-xs font-medium inline-flex items-center gap-1 disabled:opacity-50"
                       onClick={() => onDelete(d)}
                     >
                       <Trash2 className="h-3 w-3" />
                       Eliminar
                     </button>
-                  </td>
-                </tr>
+                  </Td>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
-      </div>
+      </Card>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-3">
-        <h3 className="font-medium">Analytics RAG</h3>
+      <Card className="space-y-3">
+        <h3 className="text-lg font-bold font-heading">Analytics RAG</h3>
         <p className="text-xs text-muted-foreground">
           Resumen del motor RAG (distinto de &quot;Analíticas de Salud&quot; clínicas).
         </p>
@@ -242,7 +244,7 @@ export default function KnowledgePage() {
             Sin datos de analytics (endpoint no disponible o vacío).
           </p>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

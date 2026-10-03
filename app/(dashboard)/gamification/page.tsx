@@ -1,22 +1,22 @@
 "use client";
 
 import { Trophy, Star, Zap, Plus, Edit2 } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
 
 export default function GamificationPage() {
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Gamificación</h2>
-                    <p className="text-muted-foreground">Configura niveles, recompensas y reglas de experiencia (XP).</p>
-                </div>
-            </div>
+            <PageHeader
+                title="Gamificación"
+                description="Configura niveles, recompensas y reglas de experiencia (XP)."
+            />
 
             <div className="grid gap-6 md:grid-cols-3">
                 {/* XP Rules */}
-                <div className="col-span-2 bg-card rounded-xl border border-border shadow-sm p-6">
+                <Card className="col-span-2">
                     <h3 className="text-lg font-bold font-heading mb-4 flex items-center gap-2">
-                        <Star className="h-5 w-5 text-yellow-500" />
+                        <Star className="h-5 w-5 text-warning" />
                         Reglas de XP
                     </h3>
                     <div className="space-y-4">
@@ -38,12 +38,12 @@ export default function GamificationPage() {
                     <button className="mt-4 w-full py-2 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors">
                         Guardar Cambios
                     </button>
-                </div>
+                </Card>
 
                 {/* Levels Preview */}
-                <div className="bg-card rounded-xl border border-border shadow-sm p-6">
+                <Card>
                     <h3 className="text-lg font-bold font-heading mb-4 flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-orange-500" />
+                        <Trophy className="h-5 w-5 text-warning" />
                         Niveles
                     </h3>
                     <div className="space-y-4 relative">
@@ -66,7 +66,7 @@ export default function GamificationPage() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </Card>
             </div>
         </div>
     );

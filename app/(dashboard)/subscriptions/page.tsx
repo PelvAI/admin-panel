@@ -1,6 +1,9 @@
 "use client";
 
 import { CreditCard, Check, Edit } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { cn } from "@/lib/utils";
 
 const plans = [
     {
@@ -9,8 +12,7 @@ const plans = [
         period: "/mes",
         features: ["Acceso a ejercicios básicos", "1 Evaluación mensual", "Publicidad incluida"],
         activeUsers: 850,
-        color: "bg-gray-100",
-        textColor: "text-gray-900"
+        textColor: "text-foreground"
     },
     {
         name: "Premium Mensual",
@@ -18,7 +20,6 @@ const plans = [
         period: "/mes",
         features: ["Todo ilimitado", "Sin publicidad", "Soporte prioritario", "AI Coach avanzado"],
         activeUsers: 320,
-        color: "bg-primary/10",
         textColor: "text-primary",
         highlight: true
     },
@@ -28,26 +29,26 @@ const plans = [
         period: "/año",
         features: ["Ahorras 25%", "Todo ilimitado", "Sin publicidad", "AI Coach avanzado"],
         activeUsers: 64,
-        color: "bg-orange-50",
-        textColor: "text-orange-700"
+        textColor: "text-warning"
     }
 ];
 
 export default function SubscriptionsPage() {
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight font-heading text-foreground">Suscripciones</h2>
-                    <p className="text-muted-foreground">Gestiona los planes de precios y beneficios.</p>
-                </div>
-            </div>
+            <PageHeader
+                title="Suscripciones"
+                description="Gestiona los planes de precios y beneficios."
+            />
 
             <div className="grid gap-6 md:grid-cols-3">
                 {plans.map((plan) => (
-                    <div key={plan.name} className={`relative rounded-xl border ${plan.highlight ? 'border-primary shadow-md' : 'border-border shadow-sm'} bg-card p-6 flex flex-col`}>
+                    <Card
+                        key={plan.name}
+                        className={cn("relative flex flex-col", plan.highlight && "border-primary shadow-md")}
+                    >
                         {plan.highlight && (
-                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-white text-xs font-bold rounded-full">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
                                 Más Popular
                             </div>
                         )}
@@ -63,7 +64,7 @@ export default function SubscriptionsPage() {
                         <div className="flex-1 space-y-3 mb-6">
                             {plan.features.map((feat, idx) => (
                                 <div key={idx} className="flex items-center gap-2 text-sm">
-                                    <Check className="h-4 w-4 text-green-500" />
+                                    <Check className="h-4 w-4 text-success" />
                                     {feat}
                                 </div>
                             ))}
@@ -79,7 +80,7 @@ export default function SubscriptionsPage() {
                                 Editar Plan
                             </button>
                         </div>
-                    </div>
+                    </Card>
                 ))}
             </div>
         </div>

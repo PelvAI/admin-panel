@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { X, Save, AlertTriangle } from "lucide-react";
+import { Card } from "@/components/ui/Card";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface ContextRulesMatrixProps {
     question: any;
@@ -160,25 +163,18 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <div className="bg-background rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
-                {/* Header */}
-                <div className="p-4 border-b border-border flex justify-between items-center bg-muted/10">
-                    <div>
-                        <h3 className="text-lg font-bold">Matriz de Contexto</h3>
-                        <p className="text-sm text-muted-foreground">Define puntuaciones para <span className="font-mono text-primary font-medium">{question.text_key || question.variable_name}</span></p>
-                    </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
-                        <X className="h-5 w-5" />
-                    </button>
-                </div>
+        <Modal className="max-w-5xl max-h-[90vh]">
+            <ModalHeader onClose={onClose}>
+                <h3 className="text-lg font-bold">Matriz de Contexto</h3>
+                <p className="text-sm text-muted-foreground">Define puntuaciones para <span className="font-mono text-primary font-medium">{question.text_key || question.variable_name}</span></p>
+            </ModalHeader>
 
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-auto p-6 space-y-8">
+            {/* Scrollable Content */}
+            <ModalBody className="space-y-8">
 
                     {/* SECTION 1: SIMPLE MATRIX */}
                     <div>
-                        <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
+                        <h4 className="text-sm font-bold font-mono uppercase tracking-label text-muted-foreground mb-3 flex items-center gap-2">
                             Reglas Simples (1 Target)
                         </h4>
                         <div className="border border-border rounded-lg overflow-hidden shadow-sm">
@@ -230,9 +226,9 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                     </div>
 
                     {/* SECTION 2: COMBINED RULES */}
-                    <div className="bg-slate-50 border border-border p-5 rounded-xl space-y-4">
+                    <div className="bg-muted/20 border border-border p-5 rounded-xl space-y-4">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                            <h4 className="text-sm font-bold font-mono uppercase tracking-label text-muted-foreground flex items-center gap-2">
                                 <AlertTriangle className="h-4 w-4" /> Reglas Avanzadas (Combinaciones)
                             </h4>
                         </div>
@@ -245,7 +241,7 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                                 if (!option || rules.length === 0) return null;
 
                                 return rules.map(rule => (
-                                    <div key={rule.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-border shadow-sm">
+                                    <Card key={rule.id} padding="sm" className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
                                             <div className="font-medium text-sm min-w-[150px]">
                                                 Opción: <span className="font-bold">{option.label_key || option.value}</span>
@@ -255,7 +251,7 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                                                 {rule.targets.map(tid => {
                                                     const t = targets.find(tg => tg.target_id === tid);
                                                     return (
-                                                        <span key={tid} className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold border border-blue-200">
+                                                        <span key={tid} className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold border border-primary/20">
                                                             {t ? t.name : tid}
                                                         </span>
                                                     );
@@ -268,23 +264,23 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                                                 <span className="font-bold font-mono text-lg text-primary">{rule.score}</span>
                                             </div>
                                             {rule.alert && (
-                                                <div className="flex items-center gap-1.5 px-2 py-1 bg-orange-100/50 text-orange-700 rounded border border-orange-200 text-xs">
+                                                <div className="flex items-center gap-1.5 px-2 py-1 bg-warning-wash text-gold-ink rounded border border-warning/20 text-xs">
                                                     <AlertTriangle className="h-3 w-3" />
                                                     <span className="font-bold uppercase">{rule.alert.type === 'derivacion_clinica' ? 'Derivación' : rule.alert.type === 'activar_plan' ? 'Plan' : 'Seguimiento'}</span>
-                                                    {rule.alert.message && <span className="text-orange-600/70 border-l border-orange-200 pl-1 ml-1">{rule.alert.message}</span>}
+                                                    {rule.alert.message && <span className="text-gold-ink/70 border-l border-warning/30 pl-1 ml-1">{rule.alert.message}</span>}
                                                 </div>
                                             )}
-                                            <button onClick={() => removeCombinedRule(optIdx, rule.id)} className="text-muted-foreground hover:text-red-500 p-1">
+                                            <button onClick={() => removeCombinedRule(optIdx, rule.id)} className="text-muted-foreground hover:text-danger p-1">
                                                 <X className="h-4 w-4" />
                                             </button>
                                         </div>
-                                    </div>
+                                    </Card>
                                 ));
                             })}
                         </div>
 
                         {/* Add New Rule Form */}
-                        <div className="bg-white p-4 rounded-lg border border-border/60 shadow-sm mt-4">
+                        <Card className="mt-4">
                             <h5 className="text-xs font-semibold mb-3">Agregar Nueva Regla Combinada</h5>
                             <div className="flex flex-wrap gap-4 items-end">
                                 <div className="space-y-1">
@@ -331,7 +327,7 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                                 </div>
 
                                 <div className="space-y-1 pl-4 border-l border-border/50">
-                                    <label className="text-[10px] uppercase font-bold text-muted-foreground text-orange-600 flex items-center gap-1">
+                                    <label className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
                                         <AlertTriangle className="h-3 w-3" /> Alerta (Opcional)
                                     </label>
                                     <div className="flex gap-2">
@@ -360,24 +356,21 @@ export function ContextRulesMatrix({ question, targets, onSave, onClose, questio
                                 <button
                                     onClick={handleAddCombinedRule}
                                     disabled={newRule.optIdx === null || newRule.targets.length < 2 || !newRule.score}
-                                    className="px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
+                                    className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed ml-auto"
                                 >
                                     Agregar
                                 </button>
                             </div>
-                        </div>
+                        </Card>
                     </div>
+            </ModalBody>
 
-                </div>
-
-                {/* Footer */}
-                <div className="p-4 border-t border-border flex justify-end gap-2 bg-muted/10 rounded-b-xl">
-                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"> Cancelar </button>
-                    <button onClick={handleSave} className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg flex items-center gap-2 hover:opacity-90 transition-opacity">
-                        <Save className="h-4 w-4" /> Guardar Todo
-                    </button>
-                </div>
-            </div>
-        </div>
+            <ModalFooter>
+                <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+                <Button onClick={handleSave}>
+                    <Save className="h-4 w-4" /> Guardar Todo
+                </Button>
+            </ModalFooter>
+        </Modal>
     );
 }

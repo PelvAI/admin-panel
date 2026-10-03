@@ -1,7 +1,20 @@
 @import "tailwindcss";
 
+/*
+ * Sistema de diseño ALMA — tokens.
+ * Fuente: tools/branding alma/alma_brand_manual_v2.html
+ *
+ * El manual define marca (color, tipografía, símbolo); no define UI de
+ * producto (botones, cards, badges). Lo que sigue extrapola sus principios
+ * —plano, bordes finos antes que sombra, tipografía serif solo en títulos—
+ * a un panel de trabajo real, que el propio manual reserva para fondo Snow.
+ */
+
 :root {
-  --background: #F5EFE6; /* Ivory */
+  /* ── Fondo y texto ──────────────────────────────────────────────── */
+  /* Snow, no Ivory: el manual reserva Ivory para contenido editorial y
+     Snow para "páginas de trabajo y plataforma" — que es lo que esto es. */
+  --background: #FAFAF8; /* Snow */
   --foreground: #1C2540; /* Charcoal */
 
   --primary: #0D1A3E; /* Midnight */
@@ -16,63 +29,144 @@
   --muted: #D5D9E2; /* Fog */
   --muted-foreground: #4A5570;
 
-  --card: #FAFAF8; /* Snow */
+  --card: #ffffff;
   --card-foreground: #1C2540;
 
-  --popover: #FAFAF8;
+  --popover: #ffffff;
   --popover-foreground: #1C2540;
 
   --border: #D5D9E2;
   --input: #D5D9E2;
   --ring: #0D1A3E;
 
-  --radius: 1rem; /* 16px following manual */
+  /* ── Semántica de estado ────────────────────────────────────────
+     El manual no define colores de estado (es un documento de marca, no
+     un kit de producto). Se derivan de sus propios acentos y su regla de
+     significado: Sage = ciencia/validación → éxito. Gold = logros/
+     excelencia → informativo/logro. Danger es el único color nuevo: un
+     rojo ladrillo propio, deliberadamente distinto de Rose (que el manual
+     reserva para "salud, vitalidad", no para alarma) y más contrastado
+     que el rojo por defecto de Tailwind (6.3:1 vs 4.6:1 sobre Snow). */
+  --success: #3D9E8A; /* Sage */
+  --success-wash: #E7F3F0;
+  --warning: #C9913A; /* Gold */
+  --warning-wash: #FAF2E3;
+  --danger: #A23B32;
+  --danger-wash: #F8EAE8;
+  --info: #0D1A3E; /* Midnight: dato neutro, no alarma */
+  --info-wash: #E9ECF3;
+
+  /* ── Radio: 12 / 16 / 20px, como en el manual ──────────────────── */
+  /* Qué radio usa qué pieza — para no reinventarlo vista por vista.
+     El sistema converge en un solo radio (lg) para casi todo lo
+     estructural; sm/md quedan reservados para cuando haga falta algo
+     más chico, no se usan hoy.
+     lg  → cards, botones, inputs (el radio por defecto de cualquier
+           pieza con borde)
+     full → chips, pills, avatares
+     xl/2xl (abajo) → modales, hojas grandes */
+  --radius-sm: 0.75rem;  /* 12px — reservado, sin uso hoy */
+  --radius-md: 1rem;     /* 16px — reservado, sin uso hoy */
+  --radius-lg: 1.25rem;  /* 20px */
+
+  /* ── Tracking: el "eyebrow" mono tracked-out es la firma tipográfica
+     más repetida del manual (todo título de sección, todo tag de dominio).
+     Sin estos tokens, cada vista la aproximaba con tracking-wider de
+     Tailwind (0.05em) y fuente sans — ni la letra ni el tracking correctos. */
+  --tracking-label: 0.16em;      /* .label del manual: eyebrows, tags */
+  --tracking-wordmark: 0.28em;   /* wordmark ALMA en lockup chico/inline */
+  --tracking-wordmark-lg: 0.32em; /* wordmark ALMA en lockup principal/stacked */
+
+  /* ── Sombra: el manual no usa ninguna (documento plano). Acá sí hace
+     falta algo de elevación —es un panel de trabajo, no un documento—
+     pero deliberada y mínima: dos niveles, nunca más. ──────────────── */
+  --shadow-sm: 0 1px 2px rgba(13, 26, 62, 0.06);
+  --shadow-md: 0 4px 16px rgba(13, 26, 62, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Vela Brand Palette */
+  /* Paleta de marca ALMA */
   --color-midnight: #0D1A3E;
   --color-midnight-2: #162050;
   --color-ivory: #F5EFE6;
-  --color-rose: #C4647A;
-  --color-sage: #3D9E8A;
-  --color-gold: #C9913A;
   --color-snow: #FAFAF8;
-  --color-fog: #D5D9E2;
+  --color-charcoal: #1C2540;
+  --color-slate: #4A5570;
   --color-silver: #8A95A3;
+  --color-fog: #D5D9E2;
+
+  --color-rose: #C4647A;
+  --color-rose-light: #E8A0AE;
+  --color-rose-dark: #9E4A5E;
+  --color-sage: #3D9E8A;
+  --color-sage-light: #7DC4B8;
+  --color-sage-dark: #2A7062;
+  --color-gold: #C9913A;
+  --color-gold-light: #E2B96A;
+  --color-gold-dark: #9A6E28;
+  /* gold-dark no alcanza 4.5:1 sobre warning-wash para texto chico
+     (4.07:1). gold-ink es el mismo matiz oscurecido, sólo para texto. */
+  --color-gold-ink: #74521E;
+
+  /* Identidad del usuario (avatares, iniciales). Reemplaza a "brand-*",
+     que no estaba definido en ningún lado y dejaba esos elementos sin
+     color — bug, no sólo desvío de marca. */
+  --color-identity: #0D1A3E;
+  --color-identity-wash: #E9ECF3;
 
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --color-success: var(--success);
+  --color-success-wash: var(--success-wash);
+  --color-warning: var(--warning);
+  --color-warning-wash: var(--warning-wash);
+  --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --color-info: var(--info);
+  --color-info-wash: var(--info-wash);
 
   --font-sans: 'Outfit', system-ui, sans-serif;
   --font-heading: 'Cormorant Garamond', serif;
   --font-mono: 'DM Mono', monospace;
 
-  --radius-lg: 1.25rem; /* 20px */
-  --radius-md: var(--radius);
-  --radius-sm: calc(var(--radius) - 4px);
+  --tracking-label: var(--tracking-label);
+  --tracking-wordmark: var(--tracking-wordmark);
+  --tracking-wordmark-lg: var(--tracking-wordmark-lg);
+
+  /* radius-xl quedaba en el default de Tailwind (12px) porque nunca se
+     redefinió, mientras radius-lg sí se fijó en 20px: el nombre "xl"
+     terminaba siendo más chico que "lg". Ahora la escala es monótona. */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: 1.5rem;   /* 24px */
+  --radius-2xl: 1.75rem; /* 28px */
+
+  /* Todo lo que pida más elevación que "md" cae en el mismo valor: son
+     dos niveles, nunca más — sea cual sea el nombre que use un componente. */
+  --shadow-xs: var(--shadow-sm);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-md);
+  --shadow-xl: var(--shadow-md);
+  --shadow-2xl: var(--shadow-md);
 }
 
 @layer base {
@@ -86,29 +180,4 @@
   h1 { @apply font-heading font-light leading-[0.92] tracking-[-0.02em] text-4xl lg:text-6xl; }
   h2 { @apply font-heading font-normal leading-none tracking-[-0.015em] text-3xl lg:text-5xl; }
   h3 { @apply font-heading font-medium leading-[1.2] text-2xl lg:text-3xl; }
-}
-
-@layer components {
-  .glow-bg {
-    @apply relative overflow-hidden;
-  }
-  .glow-bg::before {
-    content: '';
-    @apply absolute inset-0 pointer-events-none z-0;
-    background:
-        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(196, 100, 122, 0.08), transparent),
-        radial-gradient(ellipse 50% 60% at 80% 70%, rgba(61, 158, 138, 0.06), transparent),
-        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(201, 145, 58, 0.04), transparent);
-  }
-
-  .reveal {
-    @apply opacity-0 translate-y-5 transition-all duration-700 ease-out;
-  }
-  .reveal.visible {
-    @apply opacity-100 translate-y-0;
-  }
-
-  .ghost-text {
-    @apply absolute bottom-[-10px] right-[10px] font-heading font-semibold text-6xl text-midnight/5 leading-none select-none pointer-events-none;
-  }
 }

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { AlmaLogo } from "@/components/ui/AlmaLogo";
 import {
     LayoutDashboard,
     Users,
@@ -73,9 +73,9 @@ export function Sidebar() {
     };
 
     return (
-        <div className="flex h-screen w-64 flex-col bg-white border-r border-border shadow-sm overflow-y-auto">
+        <div className="flex h-screen w-64 flex-col bg-card border-r border-border shadow-sm overflow-y-auto">
             <div className="flex h-16 items-center justify-start border-b border-border px-6">
-                <Image src="/logo.svg" alt="ALMA Logo" width={100} height={32} className="h-8 w-auto" priority />
+                <AlmaLogo layout="inline" />
             </div>
 
             <nav className="flex-1 space-y-2 p-4">
@@ -85,7 +85,7 @@ export function Sidebar() {
                         <div key={idx} className="space-y-1">
                             <button
                                 onClick={() => toggleGroup(group.title)}
-                                className="flex items-center justify-between w-full px-2 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:text-foreground transition-colors"
+                                className="flex items-center justify-between w-full px-2 py-2 text-[10px] font-semibold text-muted-foreground font-mono uppercase tracking-label hover:text-foreground transition-colors"
                             >
                                 {group.title}
                                 <ChevronDown className={cn("h-3 w-3 transition-transform", isOpen ? "transform rotate-0" : "transform -rotate-90")} />
